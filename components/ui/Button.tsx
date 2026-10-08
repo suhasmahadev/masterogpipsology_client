@@ -1,12 +1,12 @@
 import React from 'react';
 // ─── Button UI Component ──────────────────────────────────────────────────────
-// Three variants: filled (brass), outline, ghost.
+// Variants: filled (brass), outline, ghost, liquid (gold wave fill on hover).
 // Focus ring remains visible in both light and dark themes via :focus-visible.
 
 import { type ButtonHTMLAttributes, type AnchorHTMLAttributes, type ReactNode } from 'react';
 import clsx from 'clsx';
 
-export type ButtonVariant = 'filled' | 'outline' | 'ghost';
+export type ButtonVariant = 'filled' | 'outline' | 'ghost' | 'liquid';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 interface ButtonBaseProps {
@@ -42,6 +42,7 @@ const variantClasses: Record<ButtonVariant, string> = {
     'hover:bg-accent/10',
     'active:bg-accent/20',
   ].join(' '),
+  liquid: 'btn-liquid',
   ghost: [
     'text-text hover:text-accent',
     'hover:bg-accent/8',
@@ -53,7 +54,6 @@ const baseClasses = [
   'inline-flex items-center justify-center',
   'font-body font-medium',
   'rounded-full',
-  'transition-all duration-200',
   'cursor-pointer select-none',
   'no-underline',
   'whitespace-nowrap',
@@ -62,25 +62,36 @@ const baseClasses = [
 export function Button(props: ButtonProps): React.ReactElement {
   const { variant = 'filled', size = 'md', children, className, as, ...rest } = props;
 
+  const isLiquid = variant === 'liquid';
   const classes = clsx(
     baseClasses,
+    isLiquid ? null : 'transition-all duration-200',
     sizeClasses[size],
     variantClasses[variant],
     className,
+  );
+  const content = isLiquid ? (
+    <>
+      <span className="btn-liquid__fill" aria-hidden="true" />
+      <span className="btn-liquid__label">{children}</span>
+      <span className="btn-liquid__label btn-liquid__label--ink" aria-hidden="true">{children}</span>
+    </>
+  ) : (
+    children
   );
 
   if (as === 'a') {
     const { href, ...anchorRest } = rest as ButtonAsAnchor;
     return (
       <a href={href} className={classes} {...anchorRest}>
-        {children}
+        {content}
       </a>
     );
   }
 
   return (
     <button className={classes} {...(rest as ButtonHTMLAttributes<HTMLButtonElement>)}>
-      {children}
+      {content}
     </button>
   );
 }

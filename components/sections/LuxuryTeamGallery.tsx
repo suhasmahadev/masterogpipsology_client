@@ -1,33 +1,38 @@
 'use client';
-import React, { useState, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
-import {
-  motion,
-  AnimatePresence,
-  useMotionValue,
-  useSpring,
-  useTransform,
-} from 'framer-motion';
-import { TEAM_MEMBERS, GALLERY_MOMENTS, type TeamMember } from '@/lib/content';
+import { motion, AnimatePresence } from 'framer-motion';
+import { TEAM_MEMBERS, type TeamMember } from '@/lib/content';
+import { RevealText } from '@/components/motion/RevealText';
+import { LightLeak } from '@/components/fx/LightLeak';
+import { CurtainImage } from '@/components/fx/CurtainImage';
+import { Parallax } from '@/components/fx/Parallax';
+import { getLenis } from '@/components/providers/LenisProvider';
+
+// Editorial asymmetric grid (lg): member 1 is a tall 4:5 portrait, the rest alternate
+// span-4 (3:4) and span-3 (1:1) with a vertical offset on the odd ones.
+function cardClasses(index: number): { col: string; aspect: string } {
+  if (index === 0) return { col: 'lg:col-span-5 lg:row-span-2', aspect: 'aspect-[4/5]' };
+  const i = index - 1;
+  return i % 2 === 0
+    ? { col: 'lg:col-span-4', aspect: 'aspect-[3/4]' }
+    : { col: 'lg:col-span-3 lg:mt-24', aspect: 'aspect-square' };
+}
 
 export function LuxuryTeamGallery(): React.ReactElement {
-  const [activeTab, setActiveTab] = useState<'faculty' | 'moments'>('faculty');
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
-  const sliderRef = useRef<HTMLDivElement>(null);
-  const [scrollProgress, setScrollProgress] = useState(0);
+  const triggerRef = useRef<HTMLElement | null>(null);
 
-  const updateScrollProgress = () => {
-    if (!sliderRef.current) return;
-    const { scrollLeft, scrollWidth, clientWidth } = sliderRef.current;
-    const total = scrollWidth - clientWidth;
-    setScrollProgress(total > 0 ? scrollLeft / total : 0);
-  };
+  const open = useCallback((member: TeamMember, el: HTMLElement) => {
+    triggerRef.current = el;
+    setSelectedMember(member);
+  }, []);
 
-  const scrollByAmount = (amount: number) => {
-    if (sliderRef.current) {
-      sliderRef.current.scrollBy({ left: amount, behavior: 'smooth' });
-    }
-  };
+  const close = useCallback(() => {
+    setSelectedMember(null);
+    const el = triggerRef.current;
+    if (el) requestAnimationFrame(() => el.focus());
+  }, []);
 
   return (
     <div
@@ -39,6 +44,7 @@ export function LuxuryTeamGallery(): React.ReactElement {
         paddingTop: '20px',
       }}
     >
+      <LightLeak from="left" intensity={0.6} className="fx-leak--top" />
       {/* Deep atmospheric gold & obsidian ambient light */}
       <div
         aria-hidden="true"
@@ -72,19 +78,18 @@ export function LuxuryTeamGallery(): React.ReactElement {
             The Institutional Faculty
           </motion.div>
 
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.7, delay: 0.1 }}
-            className="display font-medium leading-[1.08] tracking-tight max-w-3xl mb-4"
-            style={{ fontSize: 'clamp(2.4rem, 5vw, 4.2rem)', color: '#FAF6F0' }}
+          <RevealText
+            as="h2"
+            mode="lines"
+            trigger="scroll"
+            className="display max-w-3xl mb-4"
+            style={{ fontSize: 'var(--fs-h2)', color: '#FAF6F0' }}
           >
             Architects of the framework.<br />
             <span className="italic bg-gradient-to-r from-[#F5E5C9] via-[#E2BE68] to-[#FAF1DE] bg-clip-text text-transparent">
               Mentors in live execution.
             </span>
-          </motion.h2>
+          </RevealText>
 
           <motion.p
             initial={{ opacity: 0, y: 15 }}
@@ -95,357 +100,219 @@ export function LuxuryTeamGallery(): React.ReactElement {
           >
             Tactile 3D interactive dossier. Every mentor actively manages institutional capital and audits your live trades directly.
           </motion.p>
-
-          {/* Mode Switcher Tabs & Slider Controls */}
-          <div className="flex flex-wrap items-center justify-between w-full max-w-4xl gap-4 pt-4 border-t border-white/[0.08]">
-            <div className="flex items-center p-1 rounded-xl bg-white/[0.04] border border-white/[0.08]">
-              <button
-                onClick={() => setActiveTab('faculty')}
-                className={`px-4 py-2 rounded-lg text-xs font-body font-medium transition-all duration-300 flex items-center gap-2 ${
-                  activeTab === 'faculty'
-                    ? 'bg-[#D4AF37]/25 text-[#FAF1DE] border border-[#D4AF37]/60 shadow-[0_0_18px_rgba(212,175,55,0.25)]'
-                    : 'text-[#A0988E] hover:text-[#E8E0D5]'
-                }`}
-              >
-                <span>Faculty Leadership</span>
-                <span className="text-[10px] px-1.5 py-0.2 rounded bg-black/40 border border-white/10 font-mono">
-                  {TEAM_MEMBERS.length}
-                </span>
-              </button>
-              <button
-                onClick={() => setActiveTab('moments')}
-                className={`px-4 py-2 rounded-lg text-xs font-body font-medium transition-all duration-300 flex items-center gap-2 ${
-                  activeTab === 'moments'
-                    ? 'bg-[#D4AF37]/25 text-[#FAF1DE] border border-[#D4AF37]/60 shadow-[0_0_18px_rgba(212,175,55,0.25)]'
-                    : 'text-[#A0988E] hover:text-[#E8E0D5]'
-                }`}
-              >
-                <span>Trading Floor & Moments</span>
-                <span className="text-[10px] px-1.5 py-0.2 rounded bg-black/40 border border-white/10 font-mono">
-                  {GALLERY_MOMENTS.length}
-                </span>
-              </button>
-            </div>
-
-            {/* Slider Arrows & Status */}
-            {activeTab === 'faculty' && (
-              <div className="flex items-center gap-3">
-                <span className="hidden sm:inline-block text-[11px] font-mono text-[#8C8477]">
-                  Drag or scroll to explore
-                </span>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => scrollByAmount(-400)}
-                    aria-label="Scroll faculty left"
-                    className="w-10 h-10 rounded-xl border border-white/[0.12] bg-white/[0.03] hover:bg-[#D4AF37]/15 hover:border-[#D4AF37]/50 flex items-center justify-center text-[#E5DDD0] transition-all duration-200 active:scale-95"
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="15 18 9 12 15 6" />
-                    </svg>
-                  </button>
-                  <button
-                    onClick={() => scrollByAmount(400)}
-                    aria-label="Scroll faculty right"
-                    className="w-10 h-10 rounded-xl border border-white/[0.12] bg-white/[0.03] hover:bg-[#D4AF37]/15 hover:border-[#D4AF37]/50 flex items-center justify-center text-[#E5DDD0] transition-all duration-200 active:scale-95"
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="9 18 15 12 9 6" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
         </div>
 
-        {/* ─── PROFESSIONALLY CREATIVE 3D FACULTY MOVEMENT GALLERY ─── */}
-        {activeTab === 'faculty' ? (
-          <div className="relative">
-            <div
-              ref={sliderRef}
-              onScroll={updateScrollProgress}
-              className="flex gap-7 overflow-x-auto pt-6 pb-12 scrollbar-none cursor-grab active:cursor-grabbing select-none"
-              style={{
-                scrollbarWidth: 'none',
-                perspective: '1400px',
-                scrollSnapType: 'x mandatory',
-              }}
-            >
-              {TEAM_MEMBERS.map((member, index) => (
-                <CreativeFacultyCard
-                  key={member.id}
-                  member={member}
-                  index={index}
-                  onInspect={() => setSelectedMember(member)}
-                />
-              ))}
-            </div>
+        {/* ─── EDITORIAL FACULTY GRID ─── */}
+        <div className="flex items-center gap-3 mb-8">
+          <span className="label-caps" style={{ color: '#D4AF37' }}>
+            Faculty Leadership
+          </span>
+          <div className="flex-1 h-px" style={{ backgroundColor: 'rgba(212,175,55,0.25)' }} aria-hidden="true" />
+        </div>
 
-            {/* Interactive Progress Bar */}
-            <div className="mt-2 flex items-center justify-between gap-4">
-              <div className="flex-1 h-1 bg-white/[0.08] rounded-full overflow-hidden">
-                <motion.div
-                  className="h-full bg-gradient-to-r from-[#D4AF37] to-[#FAF1DE] rounded-full"
-                  style={{ width: `${Math.max(15, scrollProgress * 100)}%` }}
-                />
-              </div>
-              <span className="text-[11px] font-mono text-[#8C8477]">
-                {TEAM_MEMBERS.length} Key Faculty Members
-              </span>
-            </div>
-          </div>
-        ) : (
-          /* ─── TRADING FLOOR & MOMENTS MOSAIC GRID ─── */
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5 pt-2">
-            {GALLERY_MOMENTS.map((moment, i) => (
-              <motion.div
-                key={moment.id}
-                initial={{ opacity: 0, y: 30, scale: 0.95 }}
-                whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.5, delay: i * 0.07 }}
-                className="group relative rounded-2xl overflow-hidden bg-[#121216] border border-white/[0.08] hover:border-[#D4AF37]/60 transition-all duration-500 hover:shadow-[0_12px_40px_rgba(0,0,0,0.6),0_0_25px_rgba(212,175,55,0.15)] cursor-pointer"
-              >
-                <div className="relative h-64 sm:h-72 w-full overflow-hidden">
-                  <Image
-                    src={moment.image}
-                    alt={moment.title}
-                    fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                    className="object-cover group-hover:scale-110 transition-transform duration-700 ease-out brightness-90 group-hover:brightness-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#08080A] via-[#08080A]/30 to-transparent opacity-90" />
-                  <div className="absolute top-3 left-3">
-                    <span className="px-2.5 py-1 rounded-md text-[10px] font-body tracking-wider uppercase bg-black/70 backdrop-blur-md text-[#EAD078] border border-[#D4AF37]/30">
-                      {moment.tag}
-                    </span>
-                  </div>
-                  <div className="absolute bottom-3.5 left-4 right-4">
-                    <h4 className="font-display font-medium text-lg text-[#FBF8F3] mb-1 group-hover:text-[#F3E2B8] transition-colors">
-                      {moment.title}
-                    </h4>
-                    <p className="text-xs text-[#A59D91] line-clamp-2 leading-relaxed">
-                      {moment.subtitle}
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        )}
+        <div className="faculty-grid grid grid-cols-1 lg:grid-cols-12 gap-x-8 gap-y-12 items-start">
+          {TEAM_MEMBERS.map((member, index) => (
+            <FacultyCard key={member.id} member={member} index={index} onInspect={open} />
+          ))}
+        </div>
       </div>
 
-      {/* ─── DOSSIER INSPECTION MODAL ─── */}
-      <AnimatePresence>
-        {selectedMember && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/85 backdrop-blur-xl"
-            onClick={() => setSelectedMember(null)}
-          >
-            <motion.div
-              initial={{ scale: 0.92, opacity: 0, y: 25 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.92, opacity: 0, y: 25 }}
-              transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-              onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-3xl rounded-3xl bg-[#0F0F14] border border-[#D4AF37]/45 shadow-[0_25px_80px_rgba(0,0,0,0.85),0_0_50px_rgba(212,175,55,0.18)] overflow-hidden text-[#F5EFEB]"
-            >
-              {/* Top ambient gold accent */}
-              <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent" />
-
-              {/* Close Button */}
-              <button
-                onClick={() => setSelectedMember(null)}
-                aria-label="Close dossier"
-                className="absolute top-5 right-5 z-20 w-10 h-10 rounded-full bg-white/[0.08] border border-white/[0.14] hover:bg-[#D4AF37]/20 hover:border-[#D4AF37]/60 flex items-center justify-center text-[#FAF1DE] transition-all"
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              </button>
-
-              <div className="grid grid-cols-1 md:grid-cols-12 max-h-[85vh] overflow-y-auto">
-                <div className="relative md:col-span-5 h-72 md:h-full min-h-[340px] bg-[#0A0A0C]">
-                  <Image
-                    src={selectedMember.image}
-                    alt={selectedMember.name}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 360px"
-                    className="object-cover object-top"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0F0F14] md:bg-gradient-to-r md:from-transparent md:to-[#0F0F14] opacity-90" />
-                </div>
-
-                <div className="md:col-span-7 p-6 sm:p-8 flex flex-col justify-between">
-                  <div>
-                    <div className="inline-block px-3 py-1 rounded-full text-[10px] font-mono uppercase tracking-widest text-[#E8CA65] bg-[#D4AF37]/12 border border-[#D4AF37]/35 mb-3">
-                      {selectedMember.pedigree}
-                    </div>
-                    <h3 className="display font-medium text-3xl sm:text-4xl text-[#FBF8F3] tracking-tight mb-1">
-                      {selectedMember.name}
-                    </h3>
-                    <p className="text-sm font-body text-[#D4AF37] mb-5">
-                      {selectedMember.role}
-                    </p>
-
-                    <p className="text-sm sm:text-base text-[#C2BBB0] font-body leading-relaxed mb-6">
-                      {selectedMember.bio}
-                    </p>
-
-                    <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/[0.08] relative mb-6">
-                      <span className="display text-3xl text-[#D4AF37]/35 absolute top-2 left-3 leading-none">“</span>
-                      <p className="text-xs sm:text-sm italic text-[#E5DDD0] pl-5 leading-relaxed">
-                        {selectedMember.quote}
-                      </p>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {selectedMember.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="px-2.5 py-1 rounded-lg text-xs font-body bg-white/[0.04] border border-white/[0.08] text-[#D8D0C2]"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="pt-4 border-t border-white/[0.08] flex items-center justify-between text-xs font-mono text-[#A59D91]">
-                    <span>Experience: <strong className="text-[#FAF1DE]">{selectedMember.experience}</strong></span>
-                    <span>Performance: <strong className="text-[#E8CA65]">{selectedMember.metric}</strong></span>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <FacultyModal member={selectedMember} onClose={close} />
     </div>
   );
 }
 
-// ─── CREATIVE 3D GYROSCOPIC TILT FACULTY CARD ───
-interface CreativeFacultyCardProps {
+// ─── Editorial card ───
+interface FacultyCardProps {
   member: TeamMember;
   index: number;
-  onInspect: () => void;
+  onInspect: (member: TeamMember, el: HTMLElement) => void;
 }
 
-function CreativeFacultyCard({ member, index, onInspect }: CreativeFacultyCardProps): React.ReactElement {
-  const cardRef = useRef<HTMLDivElement>(null);
+function FacultyCard({ member, index, onInspect }: FacultyCardProps): React.ReactElement {
+  const { col, aspect } = cardClasses(index);
+  return (
+    <article className={`fc group relative ${col}`}>
+      <button
+        type="button"
+        onClick={(e) => onInspect(member, e.currentTarget)}
+        aria-haspopup="dialog"
+        aria-label={`Open dossier: ${member.name}`}
+        className="block w-full text-left cursor-pointer rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#D4AF37]"
+      >
+        <motion.div
+          layoutId={`fac-${member.id}`}
+          className={`relative w-full overflow-hidden rounded-2xl bg-[#0A0A0C] border border-[#D4AF37]/25 ${aspect}`}
+        >
+          <CurtainImage className="absolute inset-0">
+            <div className="fc-img relative h-full w-full">
+              <Parallax speed={0.1} className="absolute inset-x-0 -inset-y-[8%]">
+                <Image
+                  src={member.image}
+                  alt={member.name}
+                  fill
+                  sizes="(max-width: 1024px) 100vw, (max-width: 1280px) 40vw, 480px"
+                  className="object-cover object-top"
+                />
+              </Parallax>
+              <div className="absolute inset-0 bg-gradient-to-t from-[#08080A]/70 via-transparent to-transparent" />
+            </div>
+          </CurtainImage>
+        </motion.div>
+      </button>
 
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
+      <div className="mt-5">
+        <div className="text-[11px] uppercase tracking-widest text-[#D4AF37] font-body font-semibold mb-1">
+          {member.title}
+        </div>
+        <h3 className="display font-medium text-2xl sm:text-3xl text-[#FAF6F0] tracking-tight">
+          {member.name}
+        </h3>
+        <p className="mt-2 text-xs sm:text-sm text-[#A8A196] font-body">{member.pedigree}</p>
+      </div>
+    </article>
+  );
+}
 
-  // Smooth springs for 3D tilt
-  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [10, -10]), { stiffness: 200, damping: 22 });
-  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-10, 10]), { stiffness: 200, damping: 22 });
-  const glareOpacity = useSpring(useTransform(mouseX, [-0.5, 0, 0.5], [0.4, 0, 0.4]), { stiffness: 160, damping: 25 });
-  const glareAngle = useTransform(mouseX, [-0.5, 0.5], ['40deg', '140deg']);
+// ─── Dossier modal (shared-element image, focus trap, Esc, Lenis pause) ───
+function FacultyModal({ member, onClose }: { member: TeamMember | null; onClose: () => void }): React.ReactElement {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const isOpen = member !== null;
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current) return;
-    const rect = cardRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
-    mouseX.set(x);
-    mouseY.set(y);
-  };
-
-  const handleMouseLeave = () => {
-    mouseX.set(0);
-    mouseY.set(0);
-  };
+  useEffect(() => {
+    if (!isOpen) return;
+    getLenis()?.stop();
+    closeRef.current?.focus();
+    const onKey = (e: KeyboardEvent): void => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+      const root = dialogRef.current;
+      if (!root) return;
+      const focusables = Array.from(
+        root.querySelectorAll<HTMLElement>('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'),
+      ).filter((el) => !el.hasAttribute('disabled'));
+      if (!focusables.length) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const active = document.activeElement;
+      if (!root.contains(active)) {
+        e.preventDefault();
+        first.focus();
+      } else if (e.shiftKey && active === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      getLenis()?.start();
+    };
+  }, [isOpen, onClose]);
 
   return (
-    <motion.div
-      ref={cardRef}
-      initial={{ opacity: 0, y: 70, rotateY: index % 2 === 0 ? -12 : 12, scale: 0.94 }}
-      whileInView={{ opacity: 1, y: 0, rotateY: 0, scale: 1 }}
-      viewport={{ once: true, amount: 0.15 }}
-      transition={{ duration: 0.8, delay: index * 0.09, type: 'spring', damping: 24 }}
-      style={{
-        rotateX,
-        rotateY,
-        transformStyle: 'preserve-3d',
-        scrollSnapAlign: 'start',
-      }}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      onClick={onInspect}
-      className="flex-shrink-0 w-[310px] sm:w-[360px] md:w-[390px] rounded-3xl overflow-hidden bg-gradient-to-b from-[#181820] to-[#0D0D12] border border-white/[0.12] hover:border-[#D4AF37]/80 transition-all duration-500 group relative cursor-pointer shadow-[0_15px_40px_rgba(0,0,0,0.7)] hover:shadow-[0_25px_60px_rgba(0,0,0,0.85),0_0_35px_rgba(212,175,55,0.25)]"
-    >
-      {/* Specular Light Sheen Glare */}
-      <motion.div
-        aria-hidden="true"
-        className="absolute inset-0 pointer-events-none z-30"
-        style={{
-          opacity: glareOpacity,
-          background: `linear-gradient(${glareAngle}, transparent 25%, rgba(255,225,140,0.22) 50%, transparent 75%)`,
-        }}
-      />
+    <AnimatePresence>
+      {member && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/90"
+          onClick={onClose}
+        >
+          <motion.div
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="faculty-dialog-title"
+            initial={{ scale: 0.96, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.96, opacity: 0, y: 20 }}
+            transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-3xl rounded-3xl bg-[#0F0F14] border border-[#D4AF37]/45 shadow-[0_25px_80px_rgba(0,0,0,0.85),0_0_50px_rgba(212,175,55,0.18)] overflow-hidden text-[#F5EFEB]"
+          >
+            {/* Top ambient gold accent */}
+            <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent z-10" />
 
-      {/* Portrait Frame */}
-      <div className="relative h-[390px] sm:h-[430px] w-full overflow-hidden bg-[#0A0A0C]">
-        <Image
-          src={member.image}
-          alt={member.name}
-          fill
-          sizes="(max-width: 640px) 310px, (max-width: 768px) 360px, 390px"
-          className="object-cover object-top filter brightness-[0.96] contrast-[1.04] group-hover:scale-108 group-hover:brightness-105 transition-transform duration-700 ease-out"
-        />
+            {/* Close Button */}
+            <button
+              ref={closeRef}
+              type="button"
+              onClick={onClose}
+              aria-label="Close dossier"
+              className="absolute top-5 right-5 z-20 w-10 h-10 rounded-full bg-white/[0.08] border border-white/[0.14] hover:bg-[#D4AF37]/20 hover:border-[#D4AF37]/60 flex items-center justify-center text-[#FAF1DE] transition-all"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
 
-        {/* Gradient vignette for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0D0D12] via-[#0D0D12]/20 to-transparent opacity-95" />
+            <div data-lenis-prevent className="grid grid-cols-1 md:grid-cols-12 max-h-[85vh] overflow-y-auto">
+              <motion.div
+                layoutId={`fac-${member.id}`}
+                className="relative md:col-span-5 h-72 md:h-full min-h-[340px] bg-[#0A0A0C] overflow-hidden"
+              >
+                <Image
+                  src={member.image}
+                  alt={member.name}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 360px"
+                  className="object-cover object-top"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0F0F14] md:bg-gradient-to-r md:from-transparent md:to-[#0F0F14] opacity-90" />
+              </motion.div>
 
-        {/* Pedigree Pill Badge */}
-        <div className="absolute top-4 left-4 z-20">
-          <span className="px-3 py-1 rounded-full text-[11px] font-body font-medium tracking-wide uppercase bg-black/65 backdrop-blur-md text-[#EAD078] border border-[#D4AF37]/35 shadow-sm">
-            {member.pedigree}
-          </span>
-        </div>
+              <div className="md:col-span-7 p-6 sm:p-8 flex flex-col justify-between">
+                <div>
+                  <div className="inline-block px-3 py-1 rounded-full text-[10px] font-mono uppercase tracking-widest text-[#E8CA65] bg-[#D4AF37]/12 border border-[#D4AF37]/35 mb-3">
+                    {member.pedigree}
+                  </div>
+                  <h3
+                    id="faculty-dialog-title"
+                    className="display font-medium text-3xl sm:text-4xl text-[#FBF8F3] tracking-tight mb-1"
+                  >
+                    {member.name}
+                  </h3>
+                  <p className="text-sm font-body text-[#D4AF37] mb-5">{member.role}</p>
 
-        {/* Experience Pin */}
-        <div className="absolute top-4 right-4 z-20">
-          <span className="px-2.5 py-1 rounded-md text-[10px] font-mono text-[#FAF1DE] bg-white/[0.08] backdrop-blur-md border border-white/[0.14]">
-            {member.experience}
-          </span>
-        </div>
+                  <p className="text-sm sm:text-base text-[#C2BBB0] font-body leading-relaxed mb-6">{member.bio}</p>
 
-        {/* Floating Name & Title Inside Portrait */}
-        <div className="absolute bottom-4 left-5 right-5 z-20">
-          <div className="text-[11px] uppercase tracking-widest text-[#D4AF37] font-body font-semibold mb-1">
-            {member.title}
-          </div>
-          <h3 className="display font-medium text-2xl sm:text-3xl text-[#FAF6F0] tracking-tight group-hover:text-[#F3E2B8] transition-colors">
-            {member.name}
-          </h3>
-        </div>
-      </div>
+                  <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/[0.08] relative mb-6">
+                    <span className="display text-3xl text-[#D4AF37]/35 absolute top-2 left-3 leading-none" aria-hidden="true">“</span>
+                    <p className="text-xs sm:text-sm italic text-[#E5DDD0] pl-5 leading-relaxed">{member.quote}</p>
+                  </div>
 
-      {/* Card Base Details */}
-      <div className="p-5 flex flex-col justify-between gap-4 border-t border-white/[0.07] bg-[#0E0E14]">
-        <p className="text-xs sm:text-sm text-[#A8A196] font-body line-clamp-2 leading-relaxed">
-          {member.bio}
-        </p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {member.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-2.5 py-1 rounded-lg text-xs font-body bg-white/[0.04] border border-white/[0.08] text-[#D8D0C2]"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
 
-        <div className="flex items-center justify-between pt-2 border-t border-white/[0.06]">
-          <span className="text-xs font-mono text-[#D8B45E]">
-            {member.metric}
-          </span>
-          <span className="text-xs font-body font-medium text-[#FAF1DE] group-hover:translate-x-1 transition-transform flex items-center gap-1.5">
-            Dossier
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </span>
-        </div>
-      </div>
-    </motion.div>
+                <div className="pt-4 border-t border-white/[0.08] flex items-center justify-between text-xs font-mono text-[#A59D91]">
+                  <span>Focus: <strong className="text-[#FAF1DE]">{member.tags[0]}</strong></span>
+                  <span>Discipline: <strong className="text-[#E8CA65]">{member.tags[1]}</strong></span>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

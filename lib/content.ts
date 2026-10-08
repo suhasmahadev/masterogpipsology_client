@@ -49,8 +49,6 @@ export interface TeamMember {
   role: string;
   title: string;
   pedigree: string;
-  experience: string;
-  metric: string;
   image: string;
   bio: string;
   quote: string;
@@ -74,12 +72,20 @@ export const NAV_LINKS: NavLink[] = [
   { label: 'Results', href: '#gallery' },
 ];
 
-export const CTA_PRIMARY = 'Join the next cohort';
+export const CTA_PRIMARY = 'Join the team';
 export const CTA_SECONDARY = 'See the curriculum';
 
-// ─── Hero ─────────────────────────────────────────────────────────────────────
+// TODO: replace with the real invite links before launch.
+export const TELEGRAM_URL = '#telegram';
+export const WHATSAPP_URL = '#whatsapp';
 
-export const COHORT_BADGE = 'Cohort 14 · Starts 6 January 2025';
+export interface JoinChannel { id: 'telegram' | 'whatsapp'; label: string; href: string }
+export const JOIN_CHANNELS: JoinChannel[] = [
+  { id: 'telegram', label: 'Join Telegram group', href: TELEGRAM_URL },
+  { id: 'whatsapp', label: 'Join WhatsApp group', href: WHATSAPP_URL },
+];
+
+// ─── Hero ─────────────────────────────────────────────────────────────────────
 
 export const HERO_HEADLINE_LINES = [
   'Trade with the edge',
@@ -89,23 +95,6 @@ export const HERO_HEADLINE_LINES = [
 
 export const HERO_SUBLINE =
   'Education before execution. A 12-week live programme covering risk architecture, market structure, order flow and execution psychology. Built for traders who are serious about consistency.';
-
-export const HERO_STATS: Stat[] = [
-  { value: '1,400+', label: 'Graduates' },
-  { value: '78%', label: 'Retention after 6 months' },
-  { value: '4.9 / 5', label: 'Average programme rating' },
-];
-
-export const TICKER_SYMBOLS = [
-  { symbol: 'EUR/USD', change: '+0.12%', positive: true },
-  { symbol: 'GBP/JPY', change: '-0.34%', positive: false },
-  { symbol: 'XAU/USD', change: '+0.87%', positive: true },
-  { symbol: 'BTC/USD', change: '+2.14%', positive: true },
-  { symbol: 'S&P 500', change: '+0.51%', positive: true },
-  { symbol: 'NAS 100', change: '+0.73%', positive: true },
-  { symbol: 'ETH/USD', change: '-1.02%', positive: false },
-  { symbol: 'USD/CAD', change: '+0.09%', positive: true },
-];
 
 // ─── Marquee ──────────────────────────────────────────────────────────────────
 
@@ -150,23 +139,9 @@ export const MARKETS: Market[] = [
 
 // ─── Gallery / Achievements ────────────────────────────────────────────────────
 
-export const ACHIEVEMENT_STATS: Stat[] = [
-  { value: '1,400+', label: 'Graduates' },
-  { value: '78%', label: '6-month retention' },
-  { value: '14', label: 'Cohorts delivered' },
-  { value: '97%', label: 'Would recommend' },
-];
-
-export const RESULTS_WALL_RECORDS = [
-  { label: 'Cohort 12 avg monthly return', value: '+4.2%' },
-  { label: 'Prop firm pass rate', value: '68%' },
-  { label: 'Live accounts funded', value: '312' },
-  { label: 'Lowest drawdown recorded', value: '−2.1%' },
-];
-
 export const CERTIFICATE_NAME = 'Master of Pipsology';
 export const CERTIFICATE_SUBTITLE = 'Professional Trading Certification';
-export const AUDIT_BODY = 'Verified by TradeAudit™';
+export const AUDIT_BODY = 'Issued by Master of Pipsology';
 
 // ─── Curriculum ───────────────────────────────────────────────────────────────
 
@@ -212,6 +187,11 @@ export const CURRICULUM_CHAPTERS: CurriculumChapter[] = [
   },
 ];
 
+export const PROGRAMME_PILLARS = CURRICULUM_CHAPTERS.slice(0, 4).map((c) => ({
+  value: c.number,
+  label: c.title,
+}));
+
 // ─── Testimonial ──────────────────────────────────────────────────────────────
 
 export const TESTIMONIAL: Testimonial = {
@@ -224,9 +204,7 @@ export const TESTIMONIAL: Testimonial = {
 
 // ─── Final CTA ────────────────────────────────────────────────────────────────
 
-export const FINAL_CTA_HEADLINE = 'Cohort 14 starts 6 January.';
-export const FINAL_CTA_SUBLINE =
-  'Seats are capped at 40. Applications close 20 December.';
+export const FINAL_CTA_HEADLINE = 'Education before execution.';
 
 // ─── Footer ───────────────────────────────────────────────────────────────────
 
@@ -275,8 +253,6 @@ export const TEAM_MEMBERS: TeamMember[] = [
     role: 'Founder & Chief Market Strategist',
     title: 'Managing Principal',
     pedigree: 'Ex-Barclays Capital · FX Flow Desk',
-    experience: '16+ Years',
-    metric: '$480M+ Flow Executed',
     image: '/team/founder.jpeg',
     bio: 'Pioneered the institutional order flow framework taught across 14 cohorts. Former senior liquidity architect in London and Dubai.',
     quote: 'The market leaves footprint anomalies every second. Our discipline is learning how to read them without emotion.',
@@ -288,8 +264,6 @@ export const TEAM_MEMBERS: TeamMember[] = [
     role: 'Co-Founder & Executive Director',
     title: 'Executive Director',
     pedigree: 'Ex-Citadel Securities · Algorithmic Risk',
-    experience: '14+ Years',
-    metric: '99.8% Variance Control',
     image: '/team/co_founder.jpeg',
     bio: 'Directs strategic growth, capital preservation mechanics, and institutional risk governance across desk cohorts.',
     quote: 'Risk is not a secondary calculation after the entry. Risk is the entire trade.',
@@ -301,8 +275,6 @@ export const TEAM_MEMBERS: TeamMember[] = [
     role: 'Head of Quantitative Risk Architecture',
     title: 'Senior Desk Mentor',
     pedigree: 'Chicago Board of Trade (CBOT) Veteran',
-    experience: '15+ Years',
-    metric: '18,000+ Hours Live Tape',
     image: '/team/experience.png',
     bio: 'Specializes in session open auction dynamics, institutional volume profiles, and multi-asset market experience.',
     quote: 'Tape reading is the language of participants who cannot hide their size.',
@@ -314,8 +286,6 @@ export const TEAM_MEMBERS: TeamMember[] = [
     role: 'Core Faculty & Trading Team',
     title: 'Senior Faculty',
     pedigree: 'Institutional Trading Group',
-    experience: '12+ Years',
-    metric: '1,200+ Student Audits',
     image: '/team/team.jpeg',
     bio: 'Oversees multi-timeframe structural mapping, liquidity sweep identification, and collaborative desk execution.',
     quote: 'Structure gives you context. Context prevents you from becoming exit liquidity.',
@@ -327,8 +297,6 @@ export const TEAM_MEMBERS: TeamMember[] = [
     role: 'Regulatory Compliance & Licensure',
     title: 'Compliance & Standards',
     pedigree: 'Certified Institutional Standards',
-    experience: 'Full Accreditation',
-    metric: 'Verified Compliant',
     image: '/team/licence.jpeg',
     bio: 'Audited educational standards, proprietary methodology licensing, and adherence to verified risk protocols.',
     quote: 'Institutional credibility is established through transparency, compliance, and verified standards.',

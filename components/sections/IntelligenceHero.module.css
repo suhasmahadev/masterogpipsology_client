@@ -22,7 +22,7 @@
   overflow: hidden;
   background-color: var(--bg);
   color: var(--ink);
-  font-family: var(--font-manrope), 'Manrope', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-body), 'Manrope', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: geometricPrecision;
@@ -59,7 +59,8 @@
 }
 
 /* Dual Fade Overlays on .plate::after */
-.plate::after {
+.plate::after,
+.plateShade {
   content: "";
   position: absolute;
   inset: 0;
@@ -296,7 +297,7 @@
 
 .lg .word {
   position: absolute;
-  font-family: 'IpsumMark', var(--font-manrope), 'Manrope', system-ui, sans-serif;
+  font-family: 'IpsumMark', var(--font-body), 'Manrope', system-ui, sans-serif;
   font-weight: 700;
   line-height: 1;
   color: inherit;
@@ -419,7 +420,8 @@
     object-position: 43% center;
   }
 
-  .plate::after {
+  .plate::after,
+.plateShade {
     background-image:
       linear-gradient(to right,
         rgba(5, 5, 5, 0.86) 0%,
@@ -700,7 +702,8 @@
     object-position: 44% center;
   }
 
-  .plate::after {
+  .plate::after,
+.plateShade {
     background-image:
       linear-gradient(to right,
         rgba(5, 5, 5, 0.84) 0%,
@@ -755,3 +758,47 @@
     gap: calc(20 * var(--m));
   }
 }
+
+/* ==========================================================================
+   EMBEDDED IN FOREX STICKY (see lib/frame-sequence/handoff.ts)
+   ========================================================================== */
+.plateShade { position: absolute; inset: 0; pointer-events: none; opacity: 0; will-change: opacity; }
+.embedded .plate::after { content: none; }
+.stage.embedded { height: 100%; min-height: 0; overflow: hidden; }
+.embedded .plate { position: absolute; inset: 0; width: auto; height: auto; }
+.embedded .plateVideo {
+  /* left/top/width/height are set inline by ForexMarketScroll on resize */
+  position: absolute; right: auto; bottom: auto;
+  max-width: none; max-height: none;
+  object-fit: cover; object-position: 50% 50%;
+  transform-origin: 0 0; will-change: transform;
+}
+@media (max-aspect-ratio: 11/10) {
+  .stage.embedded {
+    padding: max(env(safe-area-inset-top), calc(12 * var(--m))) max(env(safe-area-inset-right), calc(22 * var(--m)))
+             max(env(safe-area-inset-bottom), calc(18 * var(--m))) max(env(safe-area-inset-left), calc(22 * var(--m)));
+  }
+  .embedded .hero { margin-top: calc(146 * var(--m)); }   /* removed topbar (76m) + original 70m */
+}
+@media (min-width: 600px) and (max-aspect-ratio: 11/10) {
+  .embedded .hero { margin-top: calc(166 * var(--m)); }   /* 76m + 90m */
+}
+
+/* Embedded statement: "Be a man. / Take that goddamn risk." */
+.statement {
+  position: absolute; inset: 0; z-index: 10;
+  display: flex; flex-direction: column; justify-content: center; align-items: flex-start;
+  padding: 0 clamp(24px, 6vw, 96px);
+  pointer-events: none;
+}
+.stmtLine {
+  margin: 0;
+  font-family: var(--font-display), 'Cormorant Garamond', Georgia, serif;
+  font-weight: 500;
+  font-size: clamp(2.75rem, 8.5vw, 8rem);
+  line-height: 1.02;
+  letter-spacing: -0.015em;
+  color: #fafafa;
+  text-shadow: 0 2px 28px rgba(0, 0, 0, 0.45);
+}
+.stmtGold { font-style: italic; color: #D9B866; }

@@ -58,8 +58,8 @@ export function Footer(): React.ReactElement {
           {FOOTER_COLUMNS.map((col) => (
             <div key={col.heading}>
               <h3
-                className="text-xs font-body font-medium uppercase tracking-widest mb-4"
-                style={{ color: 'var(--accent)' }}
+                className="label-caps mb-4"
+                style={{ color: '#D4AF37' }}
               >
                 {col.heading}
               </h3>
@@ -80,7 +80,7 @@ export function Footer(): React.ReactElement {
           ))}
         </div>
 
-        <Hairline />
+        <Hairline variant="gold" />
 
         {/* Risk disclaimer */}
         <p
@@ -90,7 +90,7 @@ export function Footer(): React.ReactElement {
           {RISK_DISCLAIMER}
         </p>
 
-        <Hairline />
+        <Hairline variant="gold" />
 
         {/* Bottom bar */}
         <div className="mt-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">

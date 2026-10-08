@@ -1,27 +1,21 @@
 import type { Metadata } from 'next';
-import { Fraunces, Manrope, Geist } from 'next/font/google';
+import { Cormorant_Garamond, Manrope } from 'next/font/google';
 import './globals.css';
 import { LenisProvider } from '@/components/providers/LenisProvider';
 import { cn } from "@/lib/utils";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
-
-
 // ─── Fonts ────────────────────────────────────────────────────────────────────
 
-const fraunces = Fraunces({
+const display = Cormorant_Garamond({
   subsets: ['latin'],
-  axes: ['opsz', 'SOFT', 'WONK'],
-  // Variable font: don't specify weight when using axes
   style: ['normal', 'italic'],
-  variable: '--font-fraunces',
+  variable: '--font-display-serif',
   display: 'swap',
 });
 
-const manrope = Manrope({
+const sans = Manrope({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
-  variable: '--font-manrope',
+  variable: '--font-sans-body',
   display: 'swap',
 });
 
@@ -30,11 +24,14 @@ const manrope = Manrope({
 export const metadata: Metadata = {
   title: 'Master of Pipsology — Professional Trading Education',
   icons: {
-    icon: '/main_logo.png',
-    apple: '/main_logo.png',
+    icon: [
+      { url: '/brand/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/brand/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: '/brand/apple-icon-180.png',
   },
   description:
-    'A 12-week live trading programme covering risk architecture, market structure, order flow and execution psychology. Forex, equities and crypto. Cohort 14 starts 6 January 2025.',
+    'Education before execution. A 12-week live trading programme covering risk architecture, market structure, order flow and execution psychology. Forex, equities and crypto.',
   keywords: [
     'trading education',
     'forex trading',
@@ -53,7 +50,7 @@ export const metadata: Metadata = {
     url: 'https://masterofpipsology.com',
     title: 'Master of Pipsology — Professional Trading Education',
     description:
-      'Join 1,400+ graduates who trade with institutional precision. Cohort 14 starts 6 January 2025.',
+      'Education before execution. A 12-week live trading programme.',
     siteName: 'Master of Pipsology',
     images: [
       {
@@ -68,8 +65,8 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Master of Pipsology — Professional Trading Education',
     description:
-      'A 12-week live trading programme. 1,400+ graduates. Cohort 14 starts 6 January 2025.',
-    images: ['/og-image.png'],
+      'Education before execution. A 12-week live trading programme covering risk, structure, order flow and execution.',
+    images: ['/og-image.jpg'],
   },
   robots: {
     index: true,
@@ -94,9 +91,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn(fraunces.variable, manrope.variable, "font-sans", geist.variable)}
+      className={cn(display.variable, sans.variable)}
       suppressHydrationWarning
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
+      </head>
       <body>
         <LenisProvider>
           {children}

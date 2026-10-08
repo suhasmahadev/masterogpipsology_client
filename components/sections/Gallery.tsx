@@ -1,21 +1,19 @@
 'use client';
 import React from 'react';
 
-// ─── Achievements Gallery ──────────────────────────────────────────────────────
-// Two large framed pieces side by side (desktop) / stacked (mobile).
-// Left: ResultsWall — verified cohort records, equity curve.
+// ─── Results Gallery ──────────────────────────────────────────────────────────
+// Two framed pieces side by side (desktop) / stacked (mobile).
+// Left: ResultsWall — programme framework pillars.
 // Right: CertificateDisplay — certification with brass border and seal.
-// Desktop: pointer-tracking tilt (max 6°, spring-damped). Disabled on touch.
-// Specular sheen sweep on hover.
-// Four-up stat bar below.
+// Desktop: pointer-tracking tilt (max 6deg, gsap.quickTo). Disabled on touch.
+// Specular sheen sweep on hover. Frames enter with a transform curtain.
 
-import { useRef, useState, useCallback } from 'react';
-import { motion, useSpring } from 'framer-motion';
+import { useRef } from 'react';
+import { gsap, useGSAP } from '@/lib/gsap';
 import { ResultsWall } from '@/components/art/ResultsWall';
 import { CertificateDisplay } from '@/components/art/CertificateDisplay';
-import { StatRow } from '@/components/ui/StatRow';
-import { ACHIEVEMENT_STATS } from '@/lib/content';
-import { SPRING_SLOW } from '@/lib/motion';
+import { RevealText } from '@/components/motion/RevealText';
+import { CurtainImage } from '@/components/fx/CurtainImage';
 
 export function Gallery(): React.ReactElement {
   return (
@@ -27,7 +25,7 @@ export function Gallery(): React.ReactElement {
       {/* Section label */}
       <div className="flex items-center gap-3 mb-4">
         <span
-          className="text-xs font-body font-medium uppercase tracking-widest"
+          className="label-caps"
           style={{ color: 'var(--accent)' }}
         >
           Results
@@ -35,31 +33,30 @@ export function Gallery(): React.ReactElement {
         <div className="flex-1 h-px" style={{ backgroundColor: 'var(--hairline)' }} aria-hidden="true" />
       </div>
 
-      <h2
+      <RevealText
+        as="h2"
+        mode="lines"
+        trigger="scroll"
         id="gallery-heading"
-        className="display font-medium leading-tight tracking-tight mb-12 md:mb-16"
-        style={{ fontSize: 'clamp(1.8rem, 3.5vw, 3.2rem)', color: 'var(--text)' }}
+        className="display mb-12 md:mb-16"
+        style={{ fontSize: 'var(--fs-h2)', color: 'var(--text)' }}
       >
         Real results from<br />real traders.
-      </h2>
+      </RevealText>
 
       {/* Gallery frames */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-12 md:mb-16">
-        <TiltFrame label="Verified cohort records">
-          <ResultsWall />
-        </TiltFrame>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+        <CurtainImage className="rounded-2xl">
+          <TiltFrame label="Programme framework">
+            <ResultsWall />
+          </TiltFrame>
+        </CurtainImage>
 
-        <TiltFrame label="Certification and awards">
-          <CertificateDisplay />
-        </TiltFrame>
-      </div>
-
-      {/* Four-up stat bar */}
-      <div
-        className="p-6 md:p-8 rounded-2xl border"
-        style={{ borderColor: 'var(--hairline)' }}
-      >
-        <StatRow stats={ACHIEVEMENT_STATS} className="justify-around flex-wrap gap-y-6" />
+        <CurtainImage className="rounded-2xl" delay={0.12}>
+          <TiltFrame label="Certification and awards">
+            <CertificateDisplay />
+          </TiltFrame>
+        </CurtainImage>
       </div>
     </section>
   );
@@ -72,83 +69,82 @@ interface TiltFrameProps {
 }
 
 function TiltFrame({ children, label }: TiltFrameProps): React.ReactElement {
-  const ref = useRef<HTMLDivElement>(null);
-  const [isHovered, setIsHovered] = useState(false);
+  const ref = useRef<HTMLElement>(null);
+  const tiltRef = useRef<HTMLDivElement>(null);
+  const sheenRef = useRef<HTMLDivElement>(null);
 
-  const rotateX = useSpring(0, SPRING_SLOW);
-  const rotateY = useSpring(0, SPRING_SLOW);
-  const sheenX = useSpring(-120, SPRING_SLOW);
-
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      const el = ref.current;
-      if (!el) return;
-
-      // Disable on touch-primary devices
+  useGSAP(
+    () => {
+      const frame = ref.current;
+      const tilt = tiltRef.current;
+      const sheen = sheenRef.current;
+      if (!frame || !tilt || !sheen) return;
+      // Disable on touch-primary devices and under reduced motion
       if (window.matchMedia('(hover: none)').matches) return;
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-      const rect = el.getBoundingClientRect();
-      const cx = rect.left + rect.width / 2;
-      const cy = rect.top + rect.height / 2;
-      const dx = (e.clientX - cx) / (rect.width / 2);
-      const dy = (e.clientY - cy) / (rect.height / 2);
+      gsap.set(sheen, { x: -120 });
+      const opts = { duration: 0.7, ease: 'power3.out' };
+      const rx = gsap.quickTo(tilt, 'rotationX', opts);
+      const ry = gsap.quickTo(tilt, 'rotationY', opts);
+      const sx = gsap.quickTo(sheen, 'x', opts);
 
-      rotateX.set(-dy * 6);
-      rotateY.set(dx * 6);
-      sheenX.set(e.clientX - rect.left);
+      const onMove = (e: PointerEvent): void => {
+        const rect = frame.getBoundingClientRect();
+        const dx = (e.clientX - (rect.left + rect.width / 2)) / (rect.width / 2);
+        const dy = (e.clientY - (rect.top + rect.height / 2)) / (rect.height / 2);
+        rx(-dy * 6);
+        ry(dx * 6);
+        sx(e.clientX - rect.left);
+      };
+      const onLeave = (): void => {
+        rx(0);
+        ry(0);
+        sx(-120);
+      };
+      frame.addEventListener('pointermove', onMove);
+      frame.addEventListener('pointerleave', onLeave);
+      return () => {
+        frame.removeEventListener('pointermove', onMove);
+        frame.removeEventListener('pointerleave', onLeave);
+      };
     },
-    [rotateX, rotateY, sheenX],
+    { scope: ref },
   );
-
-  const handleMouseLeave = useCallback(() => {
-    rotateX.set(0);
-    rotateY.set(0);
-    sheenX.set(-120);
-    setIsHovered(false);
-  }, [rotateX, rotateY, sheenX]);
 
   return (
     <figure
       ref={ref}
-      className="relative rounded-2xl border overflow-hidden"
+      className="group relative rounded-2xl border overflow-hidden"
       style={{
         borderColor: 'var(--accent)',
         perspective: '800px',
         boxShadow: 'var(--shadow-lg)',
       }}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={handleMouseLeave}
       aria-label={label}
     >
-      <motion.div
+      <div
+        ref={tiltRef}
         className="w-full p-5 md:p-6"
-        style={{
-          rotateX,
-          rotateY,
-          transformStyle: 'preserve-3d',
-          backgroundColor: 'var(--surface)',
-        }}
+        style={{ transformStyle: 'preserve-3d', backgroundColor: 'var(--surface)', willChange: 'transform' }}
       >
         {children}
 
         {/* Specular sheen */}
-        <motion.div
+        <div
           aria-hidden="true"
-          className="absolute inset-0 pointer-events-none rounded-2xl overflow-hidden"
-          style={{ opacity: isHovered ? 1 : 0, transition: 'opacity 0.3s ease' }}
+          className="absolute inset-0 pointer-events-none rounded-2xl overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity duration-300"
         >
-          <motion.div
-            className="absolute top-0 bottom-0 w-24"
+          <div
+            ref={sheenRef}
+            className="absolute top-0 bottom-0 left-0 w-24"
             style={{
-              left: sheenX,
-              background:
-                'linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)',
+              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)',
               transform: 'skewX(-15deg)',
             }}
           />
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
 
       <figcaption className="sr-only">{label}</figcaption>
     </figure>

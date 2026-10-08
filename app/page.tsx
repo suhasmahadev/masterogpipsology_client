@@ -1,15 +1,17 @@
 import React from 'react';
 // ─── Page ─────────────────────────────────────────────────────────────────────
 // Server Component. Pure composition — no logic here.
-// The ThemeScrollWrapper (client) activates the scroll→colour system on mount.
 // The ArchitecturalScene wraps the core content sections (Markets, Gallery,
 // Curriculum) to create the horizontal parallax / 3D camera-movement illusion.
 
-import { ThemeScrollWrapper } from '@/components/providers/ThemeScrollWrapper';
+import { LongTaskProbe } from '@/components/dev/LongTaskProbe';
 import { GlassHeader } from '@/components/nav/GlassHeader';
 import { Hero } from '@/components/sections/Hero';
 import { CryptoMarketScroll } from '@/components/sections/CryptoMarketScroll';
 import { ForexMarketScroll } from '@/components/sections/ForexMarketScroll';
+import { HallmarkDial } from '@/components/sections/HallmarkDial';
+import { Markets } from '@/components/sections/Markets';
+import { MomentsReel } from '@/components/sections/MomentsReel';
 import { LuxuryTeamGallery } from '@/components/sections/LuxuryTeamGallery';
 import { Gallery } from '@/components/sections/Gallery';
 import { Curriculum } from '@/components/sections/Curriculum';
@@ -17,16 +19,25 @@ import { Testimonial } from '@/components/sections/Testimonial';
 import { MagicRingShowcase } from '@/components/art/MagicRingShowcase';
 import { FinalCta } from '@/components/sections/FinalCta';
 import { Footer } from '@/components/sections/Footer';
+import { Preloader } from '@/components/fx/Preloader';
+import { PaletteBackdrop } from '@/components/fx/PaletteBackdrop';
+import { Grain } from '@/components/fx/Grain';
+import { SectionSeam } from '@/components/fx/SectionSeam';
+import { ForexFade } from '@/components/fx/ForexFade';
 
 export default function Page(): React.ReactElement {
   return (
     <>
+      <Preloader />
+      <PaletteBackdrop />
+      <Grain />
+      {process.env.NODE_ENV !== 'production' && <LongTaskProbe />}
       {/* Fixed navigation */}
       <GlassHeader />
 
       {/* Page body — the scroll root for the theme system */}
-      <ThemeScrollWrapper>
-        <main id="main-content" style={{ backgroundColor: 'var(--bg)', color: 'var(--text)' }}>
+      <div className="relative">
+        <main id="main-content" style={{ color: 'var(--text)' }}>
           {/* Skip to main content link for keyboard users */}
           <a
             href="#main-content"
@@ -38,31 +49,49 @@ export default function Page(): React.ReactElement {
 
           {/* Hero — full-viewport background image */}
           <Hero />
+          <SectionSeam tone="light" />
 
           {/* 240-frame sticky scroll sequence: "Let me introduce you to the market, first crypto" */}
           <CryptoMarketScroll />
+          <ForexFade />
 
           {/* 720-frame sticky scroll sequence: Forex + Stock Market + Opportunity */}
           <ForexMarketScroll />
 
+          {/* Hallmark dial: guilloché gold beat between Forex and the dark sections */}
+          <HallmarkDial />
+          <SectionSeam />
+
           {/* ── PERSISTENT LUXURY BLACK EFFECT (Stays black all the way to page end) ── */}
-          <div className="theme-black-section relative w-full bg-[#08080A] text-[#F5EFEB]">
-            {/* Luxury animated team movement gallery & moments */}
+          <div data-nav-tone="dark" className="theme-black-section relative w-full text-[#F5EFEB]">
+            {/* Three markets, 3D glass cards */}
+            <Markets />
+            <SectionSeam />
+
+            {/* Faculty editorial gallery */}
             <LuxuryTeamGallery />
+            <SectionSeam />
+
+            {/* Atelier film strip: pinned horizontal moments reel */}
+            <MomentsReel />
+            <SectionSeam />
+
+            {/* Programme curriculum (12-week timeline) */}
+            <Curriculum />
+            <SectionSeam />
 
             {/* Verified cohort records & certification awards */}
             <Gallery />
-
-            {/* Programme curriculum */}
-            <Curriculum />
+            <SectionSeam />
 
             <Testimonial />
             <MagicRingShowcase />
+            <SectionSeam />
             <FinalCta />
             <Footer />
           </div>
         </main>
-      </ThemeScrollWrapper>
+      </div>
     </>
   );
 }

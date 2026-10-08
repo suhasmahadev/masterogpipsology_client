@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
+import { onEveryFrame } from '@/lib/frame-loop';
 
 import './MagicRings.css';
 
@@ -95,6 +96,8 @@ export default function MagicRings({
   parallax = 0.05,
   clickBurst = false,
   alphaMode = 'luminance',
+  maxDpr = 2,
+  onUnavailable,
 }) {
   const mountRef = useRef(null);
   const propsRef = useRef(null);
@@ -103,12 +106,14 @@ export default function MagicRings({
   const hoverAmountRef = useRef(0);
   const isHoveredRef = useRef(false);
   const burstRef = useRef(0);
+  const unavailableRef = useRef(null);
+  unavailableRef.current = onUnavailable;
 
   propsRef.current = {
     color, colorTwo, speed, ringCount, attenuation, lineThickness,
     baseRadius, radiusStep, scaleRate, opacity, noiseAmount,
     rotation, ringGap, fadeIn, fadeOut, followMouse, mouseInfluence,
-    hoverScale, parallax, clickBurst, alphaMode,
+    hoverScale, parallax, clickBurst, alphaMode, maxDpr,
   };
 
   useEffect(() => {
@@ -119,11 +124,13 @@ export default function MagicRings({
     try {
       renderer = new THREE.WebGLRenderer({ alpha: true });
     } catch {
+      unavailableRef.current?.();
       return;
     }
 
     if (!renderer.capabilities.isWebGL2) {
       renderer.dispose();
+      unavailableRef.current?.();
       return;
     }
 
@@ -165,12 +172,12 @@ export default function MagicRings({
     scene.add(quad);
 
     const resize = () => {
-      const w = mount.clientWidth;
-      const h = mount.clientHeight;
-      const dpr = Math.min(window.devicePixelRatio, 2);
-      renderer.setSize(w, h);
+      const w = mount.clientWidth || 1;
+      const h = mount.clientHeight || 1;
+      const dpr = Math.min(window.devicePixelRatio || 1, propsRef.current.maxDpr);
       renderer.setPixelRatio(dpr);
-      uniforms.uResolution.value.set(w * dpr, h * dpr);
+      renderer.setSize(w, h, false);
+      uniforms.uResolution.value.set(Math.round(w * dpr), Math.round(h * dpr));
     };
     resize();
     window.addEventListener('resize', resize);
@@ -196,13 +203,12 @@ export default function MagicRings({
     mount.addEventListener('mouseleave', onMouseLeave);
     mount.addEventListener('click', onClick);
 
-    let frameId = 0;
+    let unsubscribe = null;
     let isVisible = false;
     let isPageVisible = !document.hidden;
     let elapsed = 0;
     let lastT = 0;
     const animate = (t) => {
-      frameId = requestAnimationFrame(animate);
       const p = propsRef.current;
 
       const dt = lastT === 0 ? 0 : Math.min(t - lastT, 100);
@@ -240,18 +246,16 @@ export default function MagicRings({
 
       renderer.render(scene, camera);
     };
-    frameId = 0;
-
     const tryStart = () => {
-      if (isVisible && isPageVisible && frameId === 0) {
+      if (isVisible && isPageVisible && !unsubscribe) {
         lastT = 0;
-        frameId = requestAnimationFrame(animate);
+        unsubscribe = onEveryFrame(animate, 'render');
       }
     };
     const tryStop = () => {
-      if (frameId !== 0) {
-        cancelAnimationFrame(frameId);
-        frameId = 0;
+      if (unsubscribe) {
+        unsubscribe();
+        unsubscribe = null;
       }
     };
 
@@ -270,10 +274,17 @@ export default function MagicRings({
     };
     document.addEventListener('visibilitychange', onVisibility);
 
+    const onContextLost = () => {
+      tryStop();
+      unavailableRef.current?.();
+    };
+    renderer.domElement.addEventListener('webglcontextlost', onContextLost);
+
     tryStart();
 
     return () => {
       tryStop();
+      renderer.domElement.removeEventListener('webglcontextlost', onContextLost);
       io.disconnect();
       document.removeEventListener('visibilitychange', onVisibility);
       window.removeEventListener('resize', resize);
