@@ -85,6 +85,14 @@ export const JOIN_CHANNELS: JoinChannel[] = [
   { id: 'whatsapp', label: 'Join WhatsApp group', href: WHATSAPP_URL },
 ];
 
+// Footer "Join now" capsules. Generic placeholder links, replace with MOP links.
+export interface JoinLink { id: 'whatsapp' | 'instagram' | 'telegram'; label: string; href: string }
+export const JOIN_LINKS: JoinLink[] = [
+  { id: 'whatsapp', label: 'WhatsApp', href: 'https://wa.me/' },
+  { id: 'instagram', label: 'Instagram', href: 'https://www.instagram.com/' },
+  { id: 'telegram', label: 'Telegram', href: 'https://t.me/' },
+];
+
 // ─── Hero ─────────────────────────────────────────────────────────────────────
 
 export const HERO_HEADLINE_LINES = [

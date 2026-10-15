@@ -57,7 +57,7 @@ Rulebook for anyone (human or AI) changing or deploying this site. Commit before
 - **Social links:** Placeholders in `lib/content.ts` — verify names before launch:
   - `TELEGRAM_URL` (currently `'#telegram'`)
   - `WHATSAPP_URL` (currently `'#whatsapp'`)
-- **Join buttons:** Live only in navbar and mobile menu (nowhere else)
+- **Join buttons:** Live in navbar, mobile menu, and Final CTA section. Final CTA "Join now" button reveals WhatsApp/Instagram/Telegram capsules via `JoinNow.tsx` using `JOIN_LINKS` from `lib/content.ts` (currently placeholder links; toggle with Escape/outside-click, respects reduced motion)
 
 ---
 

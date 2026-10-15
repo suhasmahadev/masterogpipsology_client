@@ -4,11 +4,10 @@ import React from 'react';
 // Sits at the darkest point of the scroll transition (~100%).
 // Server Component.
 
-import { StartJourneyLink } from '@/components/nav/StartJourneyLink';
+import { JoinNow } from '@/components/nav/JoinNow';
 import { TypingHeading } from '@/components/ui/TypingHeading';
 import type { TypingSegment } from '@/lib/typing';
 import { LightLeak } from '@/components/fx/LightLeak';
-import { Magnetic } from '@/components/fx/Magnetic';
 import { Hairline } from '@/components/ui/Hairline';
 
 const CTA_HEADLINE: TypingSegment[] = [
@@ -49,9 +48,7 @@ export function FinalCta(): React.ReactElement {
           />
 
           <div className="flex flex-wrap justify-center items-center gap-3">
-            <Magnetic>
-              <StartJourneyLink id="cta-secondary" />
-            </Magnetic>
+            <JoinNow />
           </div>
 
           {/* Brass hairline below */}
