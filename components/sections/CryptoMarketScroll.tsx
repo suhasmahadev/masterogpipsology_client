@@ -107,6 +107,7 @@ export function CryptoMarketScroll(): React.ReactElement {
           height: '100dvh',
           backgroundColor: '#EFE7DC',
           contain: 'layout paint',
+          touchAction: 'pan-y pinch-zoom',
         }}
       >
         {/* Canvas fills the sticky wrapper exactly; DepthStage adds the 3D tilt */}
