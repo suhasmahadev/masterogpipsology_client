@@ -292,6 +292,7 @@ export function ForexMarketScroll(): React.ReactElement {
           height: '100dvh',
           backgroundColor: '#050505',
           contain: 'layout paint',
+          touchAction: 'pan-y pinch-zoom',
         }}
       >
         {/* Layer 0: The IntelligenceHero with its video plate – blends directly with the last frame */}

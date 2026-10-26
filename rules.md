@@ -42,6 +42,18 @@ Rulebook for anyone (human or AI) changing or deploying this site. Commit before
 - WebGL/Three.js: lazy-loaded with static fallbacks
 - Respect `prefers-reduced-motion`
 
+**Scroll timing (step scroll, `lib/step-scroll.ts` → `STEP_TUNING`):**
+- Every tunable lives in `STEP_TUNING`: min push per device (touch 8 px, wheel 1 px, trackpad 3 px), base glide (48 fps,
+  0.4 s ease-in, 1.0 s brake), speed steps 1 / 1.4 / 1.8 / 2.2 x (cap level 3), streak window 600 ms, final-stop holds
+  700 / 500 / 350 / 250 ms by level (80–250 ms when input is queued), run extension cap 3 stops, reverse brake 0.3 s,
+  tap < 8 px and ≤ 300 ms. Change values there only.
+- Extra same-direction swipes during a glide extend it straight through the next stops (continuous speed, brake only into the
+  final stop; only the final stop holds). Input during a hold is queued, never dropped. Runs stop at sequence edges.
+- Glides run on the shared ticker (`onEveryFrame(..., 'update')`, delta time); no own rAF, no Lenis duration tweens.
+- Video auto-advance (Forex O3 → video) is `AUTO_ADVANCE_MS` = 450 ms, always 1x, never extended; not part of `STEP_TUNING`.
+- Sticky stages use `touch-action: pan-y pinch-zoom`; `html.step-zone` disables overscroll inside the zone.
+- Reduced motion: no Lenis, instant jumps, same queue and hold rules.
+
 **Targets:**
 - Lighthouse 90+
 - No long tasks during fast scroll
@@ -51,7 +63,7 @@ Rulebook for anyone (human or AI) changing or deploying this site. Commit before
 
 ## 3. Content Rules
 
-- **Copy:** Don't change unless owner explicitly asks. Hook boxes (one per sequence stop, Crypto and Forex) are sourced from `CRYPTO_HOOKS` and `MARKET_HOOKS` in `lib/content.ts`. Workflow caption rails are no longer rendered. Hook text leaves over 0–0.25 of the glide away; incoming text reveals letter by letter over 0.25–1.0 of the glide into each stop, settling as the frame lands.
+- **Copy:** Don't change unless owner explicitly asks. Hook boxes (one per sequence stop, Crypto and Forex) are sourced from `CRYPTO_HOOKS` and `MARKET_HOOKS` in `lib/content.ts`. Workflow caption rails are no longer rendered. Hook text leaves over 0–0.25 of the glide away; incoming text reveals letter by letter over 0.25–1.0 of the glide into each stop, settling as the frame lands at any glide speed; hooks of stops passed mid-run may flash past but never overlap.
 - **Metrics:** No fake numbers — no hardcoded/random counters, stats, FPS readouts, or "real data" you invented. Only real data is allowed.
 - **Assets:** Never delete
 - **Social links:** Placeholders in `lib/content.ts` — verify names before launch:
@@ -104,10 +116,11 @@ Rulebook for anyone (human or AI) changing or deploying this site. Commit before
 | `next.config.ts` | Cache headers, image optimization |
 | `lib/frame-sequence/sources.ts` | `FRAME_SET_VERSION`, frame URLs, tier selection |
 | `lib/frame-loop.ts` | Shared gsap.ticker rAF loop |
+| `lib/step-scroll.ts` | Step-scroll policy and `STEP_TUNING` (all scroll feel tunables) |
 | `lib/content.ts` | All copy, `TELEGRAM_URL`, `WHATSAPP_URL` |
 | `docs/FRAME_QUALITY.md` | Frame pipeline: extract, upscale, denoise, encode |
 | `package.json` | Scripts: `frames`, `build`, `test` |
 
 ---
 
-**Last updated:** 2026-10-14
+**Last updated:** 2026-10-26

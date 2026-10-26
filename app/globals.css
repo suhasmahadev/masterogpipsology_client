@@ -191,6 +191,12 @@ html {
   font-size: clamp(14px, 1.05vw + 0.5rem, 17px);
 }
 
+/* Step-scroll zone (useStepScroll toggles the class): no rubber-band / pull-to-refresh fighting the glides */
+html.step-zone,
+html.step-zone body {
+  overscroll-behavior-y: none;
+}
+
 body {
   /* Background NEVER changes globally — stays warm beige at all scroll positions */
   background-color: var(--bg);
