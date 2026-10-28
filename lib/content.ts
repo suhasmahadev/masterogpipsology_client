@@ -405,6 +405,17 @@ export const TEAM_MEMBERS: TeamMember[] = [
     quote: 'Institutional credibility is established through transparency, compliance, and verified standards.',
     tags: ['Licensure', 'Compliance', 'Certified Standards'],
   },
+  {
+    id: 'member-6',
+    name: 'Kiran Nag · Live Desk',
+    role: 'Founder & Head of Trading Desk',
+    title: 'Founder · Mysore Community',
+    pedigree: '10+ Years Live Trading · ProfitFX Dubai',
+    image: '/team/founder_img2.png',
+    bio: 'Conducting live trading audits, structural market reviews, and execution masterclasses for Mysore community traders.',
+    quote: 'Discipline in execution is what separates an amateur from a seasoned trader.',
+    tags: ['Live Execution', 'Desk Leadership', 'Mysore Community'],
+  },
 ];
 
 // ─── Desk & Cohort Moments ───────────────────────────────────────────────────
@@ -444,6 +455,13 @@ export const GALLERY_MOMENTS: GalleryMoment[] = [
     subtitle: 'Institutional certification, compliance and verified regulatory standards',
     image: '/team/licence.jpeg',
     tag: 'Licence',
+  },
+  {
+    id: 'moment-6',
+    title: 'Kiran Nag · Live Desk Session',
+    subtitle: '10+ years experience · Founder guiding live order flow execution in Mysore',
+    image: '/team/founder_img2.png',
+    tag: 'Founder',
   },
 ];
 
