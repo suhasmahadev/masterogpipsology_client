@@ -19,6 +19,7 @@ import { Testimonial } from '@/components/sections/Testimonial';
 import { MagicRingShowcase } from '@/components/art/MagicRingShowcase';
 import { FinalCta } from '@/components/sections/FinalCta';
 import { Footer } from '@/components/sections/Footer';
+import { StrategiesSection } from '@/components/sections/StrategiesSection';
 import { FrameDebugHud } from '@/components/debug/FrameDebugHud'; // TEMP debug HUD
 import { Preloader } from '@/components/fx/Preloader';
 import { PaletteBackdrop } from '@/components/fx/PaletteBackdrop';
@@ -84,6 +85,10 @@ export default function Page(): React.ReactElement {
 
             {/* Verified cohort records & certification awards */}
             <Gallery />
+            <SectionSeam />
+
+            {/* 8 Strategies framework */}
+            <StrategiesSection />
             <SectionSeam />
 
             <Testimonial />

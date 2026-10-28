@@ -664,7 +664,10 @@ html.js .rt-pending {
 
 /* ─── Phase 4: scroll-effects layer ──────────────────────────────────────────── */
 @keyframes pl-failsafe { to { visibility: hidden; opacity: 0; } }
+/* Safety net: if JS fails entirely the loader auto-hides after 5s */
 .preloader { animation: pl-failsafe 0s 5s forwards; }
+/* Dark background matches the enhanced loader palette (#0E0F12) */
+.preloader { background-color: #0E0F12; }
 
 .pb-root { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
 .pb-layer { position: absolute; inset: 0; }
@@ -1026,3 +1029,73 @@ html.js .lr-pending { opacity: 0; animation: lr-failsafe 0s 5.5s forwards; }
 
 /* TypingHeading trigger="scroll": keep letters hidden until typed even if the 9 s CSS failsafe already fired */
 html.js .th--armed .th-c:not(.is-on) { opacity: 0; animation: none; }
+
+/* ─── Strategies section ──────────────────────────────────────────────────── */
+/* Responsive grid: 4 cols ≥1024, 2 cols ≥640, 1 col <640 (CLS≈0 approach) */
+.strategies-grid {
+  grid-template-columns: repeat(1, 1fr);
+}
+@media (min-width: 640px) {
+  .strategies-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1024px) {
+  .strategies-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* Card glass with @supports fallback */
+.strat-card__glass {
+  background: #14161B;
+}
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .strat-card__glass {
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    backdrop-filter: blur(20px) saturate(160%);
+    background: rgba(20, 22, 27, 0.82);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 8px 32px rgba(0, 0, 0, 0.45);
+  }
+}
+
+/* Card header button focus ring — visible on dark background */
+.strat-card__btn:focus-visible {
+  outline: 2px solid #E0C38A;
+  outline-offset: -2px;
+  border-radius: 12px;
+}
+
+/* Locked link hover */
+.strat-locked-link:hover,
+.strat-locked-link:focus-visible {
+  border-color: rgba(195, 162, 104, 0.75) !important;
+  background: rgba(195, 162, 104, 0.1);
+}
+.strat-locked-link:focus-visible {
+  outline: 2px solid #E0C38A;
+  outline-offset: 2px;
+  border-radius: 999px;
+}
+
+/* Join button hover states */
+.strat-btn-primary:hover,
+.strat-btn-primary:focus-visible {
+  opacity: 0.88;
+}
+.strat-btn-primary:focus-visible {
+  outline: 2px solid #E0C38A;
+  outline-offset: 3px;
+}
+.strat-btn-secondary:hover,
+.strat-btn-secondary:focus-visible {
+  border-color: rgba(224, 195, 138, 0.9) !important;
+  background: rgba(195, 162, 104, 0.08) !important;
+}
+.strat-btn-secondary:focus-visible {
+  outline: 2px solid #E0C38A;
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .strat-card__glass, .strat-locked-link, .strat-btn-primary, .strat-btn-secondary {
+    transition: none !important;
+  }
+}

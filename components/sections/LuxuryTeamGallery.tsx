@@ -9,10 +9,24 @@ import { CurtainImage } from '@/components/fx/CurtainImage';
 import { Parallax } from '@/components/fx/Parallax';
 import { getLenis } from '@/components/providers/LenisProvider';
 
-// Editorial asymmetric grid (lg): member 1 is a tall 4:5 portrait, the rest alternate
-// span-4 (3:4) and span-3 (1:1) with a vertical offset on the odd ones.
-function cardClasses(index: number): { col: string; aspect: string } {
+// Per-image object-position tuning so every photo shows its subject fully
+function imgPosition(image?: string): string {
+  const img = image ?? '';
+  if (img.includes('team')) return 'center center';
+  if (img.includes('licence')) return 'center center';
+  if (img.includes('experience')) return 'center 20%';
+  if (img.includes('co_founder')) return 'center 15%';
+  return 'center top';
+}
+
+function cardClasses(index: number, image?: string): { col: string; aspect: string } {
   if (index === 0) return { col: 'lg:col-span-5 lg:row-span-2', aspect: 'aspect-[4/5]' };
+  if (image?.includes('team')) {
+    return { col: 'lg:col-span-4', aspect: 'aspect-[16/11]' };
+  }
+  if (image?.includes('licence')) {
+    return { col: 'lg:col-span-3 lg:mt-8', aspect: 'aspect-[4/3]' };
+  }
   const i = index - 1;
   return i % 2 === 0
     ? { col: 'lg:col-span-4', aspect: 'aspect-[3/4]' }
@@ -127,7 +141,8 @@ interface FacultyCardProps {
 }
 
 function FacultyCard({ member, index, onInspect }: FacultyCardProps): React.ReactElement {
-  const { col, aspect } = cardClasses(index);
+  const { col, aspect } = cardClasses(index, member.image);
+  const isDocumentOrGroup = Boolean(member.image?.includes('licence') || member.image?.includes('team'));
   return (
     <article className={`fc group relative ${col}`}>
       <button
@@ -143,16 +158,30 @@ function FacultyCard({ member, index, onInspect }: FacultyCardProps): React.Reac
         >
           <CurtainImage className="absolute inset-0">
             <div className="fc-img relative h-full w-full">
-              <Parallax speed={0.1} className="absolute inset-x-0 -inset-y-[8%]">
-                <Image
-                  src={member.image}
-                  alt={member.name}
-                  fill
-                  sizes="(max-width: 1024px) 100vw, (max-width: 1280px) 40vw, 480px"
-                  className="object-cover object-top"
-                />
-              </Parallax>
-              <div className="absolute inset-0 bg-gradient-to-t from-[#08080A]/70 via-transparent to-transparent" />
+              {isDocumentOrGroup ? (
+                <div className="relative h-full w-full p-2.5 sm:p-3 flex items-center justify-center bg-[#07070A]">
+                  <Image
+                    src={member.image}
+                    alt={member.name}
+                    fill
+                    sizes="(max-width: 1024px) 100vw, (max-width: 1280px) 40vw, 480px"
+                    style={{ objectFit: 'contain', objectPosition: 'center center' }}
+                  />
+                </div>
+              ) : (
+                <>
+                  <Parallax speed={0.1} className="absolute inset-x-0 -inset-y-[8%]">
+                    <Image
+                      src={member.image}
+                      alt={member.name}
+                      fill
+                      sizes="(max-width: 1024px) 100vw, (max-width: 1280px) 40vw, 480px"
+                      style={{ objectFit: 'cover', objectPosition: imgPosition(member.image) }}
+                    />
+                  </Parallax>
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#08080A]/70 via-transparent to-transparent pointer-events-none" />
+                </>
+              )}
             </div>
           </CurtainImage>
         </motion.div>
@@ -257,16 +286,21 @@ function FacultyModal({ member, onClose }: { member: TeamMember | null; onClose:
             <div data-lenis-prevent className="grid grid-cols-1 md:grid-cols-12 max-h-[85vh] overflow-y-auto">
               <motion.div
                 layoutId={`fac-${member.id}`}
-                className="relative md:col-span-5 h-72 md:h-full min-h-[340px] bg-[#0A0A0C] overflow-hidden"
+                className="relative md:col-span-5 h-72 md:h-full min-h-[340px] bg-[#0A0A0C] overflow-hidden flex items-center justify-center p-3"
               >
                 <Image
                   src={member.image}
                   alt={member.name}
                   fill
                   sizes="(max-width: 768px) 100vw, 360px"
-                  className="object-cover object-top"
+                  style={{
+                    objectFit: member.image?.includes('licence') || member.image?.includes('team') ? 'contain' : 'cover',
+                    objectPosition: imgPosition(member.image),
+                  }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0F0F14] md:bg-gradient-to-r md:from-transparent md:to-[#0F0F14] opacity-90" />
+                {!member.image?.includes('licence') && !member.image?.includes('team') && (
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0F0F14] md:bg-gradient-to-r md:from-transparent md:to-[#0F0F14] opacity-90" />
+                )}
               </motion.div>
 
               <div className="md:col-span-7 p-6 sm:p-8 flex flex-col justify-between">

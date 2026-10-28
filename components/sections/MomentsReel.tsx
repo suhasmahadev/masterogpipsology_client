@@ -9,6 +9,14 @@ import Image from 'next/image';
 import { GALLERY_MOMENTS } from '@/lib/content';
 import { gsap } from '@/lib/gsap';
 
+// Per-image object-position so subjects are never cut off
+function imgPosition(image: string): string {
+  if (image.includes('team')) return 'center center';
+  if (image.includes('experience')) return 'center 20%';
+  if (image.includes('co_founder')) return 'center 15%';
+  return 'center top';
+}
+
 const N = GALLERY_MOMENTS.length;
 const VISIBLE = 4; // depths 0..3 are mounted; depth 3 is hidden (preloads next-next)
 
@@ -200,16 +208,23 @@ export function MomentsReel(): React.ReactElement {
                   transform: `translate3d(0,${POSES[d].y}px,0) rotate(${POSES[d].rotation}deg) scale(${POSES[d].scale})`,
                 }}
               >
-                <Image
-                  src={moment.image}
-                  alt={moment.title}
-                  fill
-                  loading="lazy"
-                  draggable={false}
-                  sizes="(max-width: 768px) 88vw, 560px"
-                  className="object-cover pointer-events-none"
-                />
-                <div className="absolute inset-0 z-[2] pointer-events-none bg-gradient-to-t from-[#08080A] via-[#08080A]/35 to-transparent" />
+                <div className="relative h-full w-full bg-[#08080C] flex items-center justify-center">
+                  <Image
+                    src={moment.image}
+                    alt={moment.title}
+                    fill
+                    loading="lazy"
+                    draggable={false}
+                    sizes="(max-width: 768px) 88vw, 560px"
+                    style={{
+                      objectFit: moment.image.includes('licence') || moment.image.includes('team') ? 'contain' : 'cover',
+                      objectPosition: imgPosition(moment.image),
+                      padding: moment.image.includes('licence') || moment.image.includes('team') ? '12px' : '0px',
+                    }}
+                    className="pointer-events-none"
+                  />
+                </div>
+                <div className="absolute inset-0 z-[2] pointer-events-none bg-gradient-to-t from-[#08080A] via-[#08080A]/25 to-transparent" />
                 <figcaption className="absolute z-[4] left-6 right-6 bottom-8 max-w-xl pointer-events-none">
                   <div className="label-caps mb-2" style={{ color: '#D4AF37' }}>
                     {moment.tag}
