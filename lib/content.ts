@@ -68,6 +68,7 @@ export interface GalleryMoment {
 export const NAV_LINKS: NavLink[] = [
   { label: 'Programme', href: '#curriculum' },
   { label: 'Markets', href: '#markets' },
+  { label: 'Strategies', href: '#strategies' },
   { label: 'Faculty', href: '#team' },
   { label: 'Results', href: '#gallery' },
 ];
@@ -77,7 +78,8 @@ export const CTA_SECONDARY = 'Start journey';
 
 // TODO: replace with the real invite links before launch.
 export const TELEGRAM_URL = '#telegram';
-export const WHATSAPP_URL = '#whatsapp';
+export const WHATSAPP_URL = 'https://chat.whatsapp.com/Lelbvw3BQPB8n7fSVpniTY';
+export const INSTAGRAM_URL = 'https://www.instagram.com/masterofpipsology/';
 
 export interface JoinChannel { id: 'telegram' | 'whatsapp'; label: string; href: string }
 export const JOIN_CHANNELS: JoinChannel[] = [
@@ -85,12 +87,12 @@ export const JOIN_CHANNELS: JoinChannel[] = [
   { id: 'whatsapp', label: 'Join WhatsApp group', href: WHATSAPP_URL },
 ];
 
-// Footer "Join now" capsules. Generic placeholder links, replace with MOP links.
+// Footer "Join now" capsules.
 export interface JoinLink { id: 'whatsapp' | 'instagram' | 'telegram'; label: string; href: string }
 export const JOIN_LINKS: JoinLink[] = [
-  { id: 'whatsapp', label: 'WhatsApp', href: 'https://wa.me/' },
-  { id: 'instagram', label: 'Instagram', href: 'https://www.instagram.com/' },
-  { id: 'telegram', label: 'Telegram', href: 'https://t.me/' },
+  { id: 'whatsapp', label: 'WhatsApp', href: WHATSAPP_URL },
+  { id: 'instagram', label: 'Instagram', href: INSTAGRAM_URL },
+  { id: 'telegram', label: 'Telegram', href: TELEGRAM_URL },
 ];
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
@@ -444,3 +446,72 @@ export const GALLERY_MOMENTS: GalleryMoment[] = [
     tag: 'Licence',
   },
 ];
+
+// ─── 8 Strategies ─────────────────────────────────────────────────────────────
+// PLACEHOLDER COPY — client to replace with approved descriptions
+
+export interface Strategy {
+  id: number;
+  name: string;
+  teaser: string;
+}
+
+export const STRATEGIES: Strategy[] = [
+  {
+    id: 1,
+    name: 'Indecision Strategy',
+    teaser:
+      'Learn to recognise the moments when the market is undecided, and why standing aside is a position. Understand how competing buyers and sellers create the conditions that precede a decisive move.',
+  },
+  {
+    id: 2,
+    name: '50% Correction Zone',
+    teaser:
+      'Discover how price repeatedly returns to the midpoint of a prior range before committing to direction. Learn the zone where institutional orders tend to cluster for high-probability entries.',
+  },
+  {
+    id: 3,
+    name: 'Third Dimension',
+    teaser:
+      'Explore the layer of market context that most traders ignore — the broader structural narrative that determines whether a setup has real confluence or is simply noise.',
+  },
+  {
+    id: 4,
+    name: 'Fourth Dimension',
+    teaser:
+      'Learn how time itself functions as a filter, and why the same setup carries different weight at different points in the trading session or cycle.',
+  },
+  {
+    id: 5,
+    name: 'Wick – Body Formation',
+    teaser:
+      'Understand what the relationship between a candle's wick and its body reveals about the intent of participants — and how this single piece of data can confirm or invalidate a setup.',
+  },
+  {
+    id: 6,
+    name: 'Candle Analysis',
+    teaser:
+      'Move beyond patterns and learn to read individual candles as a record of the battle between buyers and sellers, building the contextual judgment that separates reactive traders from prepared ones.',
+  },
+  {
+    id: 7,
+    name: 'Sentiment Analysis',
+    teaser:
+      'Learn how to gauge the dominant mood of the market across different participant groups, and how prevailing sentiment shapes the environment in which your technical setups play out.',
+  },
+  {
+    id: 8,
+    name: 'Geopolitical Issues',
+    teaser:
+      'Understand the mechanisms by which major geopolitical events move markets, and how to position your risk before, during and after high-impact macro catalysts.',
+  },
+];
+
+export const STRATEGIES_LABEL = 'The framework';
+export const STRATEGIES_HEADLINE_PLAIN = 'The ';
+export const STRATEGIES_HEADLINE_EM = '8 Strategies';
+export const STRATEGIES_SUBLINE =
+  'One framework, applied across forex, crypto and the share market.';
+export const STRATEGIES_JOIN_HEADLINE = 'Get the full strategies in the channel';
+export const STRATEGIES_JOIN_BODY =
+  'Every strategy is taught live, with annotated charts and live Q&A. Join the WhatsApp channel to access the full lesson library.';
