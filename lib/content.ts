@@ -366,7 +366,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     name: 'Co-Founder',
     role: 'Co-Founder & Executive Director',
     title: 'Executive Director',
-    pedigree: 'Ex-Citadel Securities · Algorithmic Risk',
+    pedigree: ' algo trader with 5+ years experience',
     image: '/team/co_founder_v2.jpeg',
     bio: 'Directs strategic growth, capital preservation mechanics, and institutional risk governance across desk cohorts.',
     quote: 'Risk is not a secondary calculation after the entry. Risk is the entire trade.',
