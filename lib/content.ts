@@ -398,7 +398,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
   },
   {
     id: 'member-5',
-    name: 'Elite Trander-fundednext',
+    name: 'Elite Trader- FundedNext',
     role: 'achievements',
     title: 'achievements',
     pedigree: 'Certified Trader',
