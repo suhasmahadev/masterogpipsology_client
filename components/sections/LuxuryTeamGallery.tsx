@@ -1,0 +1,696 @@
+'use client';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Image from 'next/image';
+import { motion, AnimatePresence, type Variants } from 'framer-motion';
+import {
+  TEAM_MEMBERS,
+  SPECIALIST_ANALYSTS,
+  type TeamMember,
+  type SpecialistAnalyst,
+} from '@/lib/content';
+import { LetterReveal } from '@/components/motion/LetterReveal';
+import { LightLeak } from '@/components/fx/LightLeak';
+import { CurtainImage } from '@/components/fx/CurtainImage';
+import { Parallax } from '@/components/fx/Parallax';
+import { getLenis } from '@/components/providers/LenisProvider';
+
+// Per-image object-position tuning so every photo shows its subject fully
+function imgPosition(image?: string): string {
+  const img = image ?? '';
+  if (img.includes('licence')) return 'center center';
+  if (img.includes('experience')) return 'center 20%';
+  if (img.includes('co_founder')) return 'center 15%';
+  return 'center top';
+}
+
+function cardClasses(index: number, image?: string): { col: string; aspect: string } {
+  if (index === 0) return { col: 'lg:col-span-5 lg:row-span-2', aspect: 'aspect-[4/5]' };
+  if (image?.includes('licence')) {
+    return { col: 'lg:col-span-7 lg:mt-6', aspect: 'aspect-[16/9]' };
+  }
+  const i = index - 1;
+  return i % 2 === 0
+    ? { col: 'lg:col-span-4', aspect: 'aspect-[3/4]' }
+    : { col: 'lg:col-span-3 lg:mt-16', aspect: 'aspect-square' };
+}
+
+// Automated horizontal spreading animation variants
+const spreadContainerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.12,
+      delayChildren: 0.15,
+    },
+  },
+};
+
+const spreadCardVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    x: -60,
+    scale: 0.92,
+    filter: 'blur(6px)',
+  },
+  visible: {
+    opacity: 1,
+    x: 0,
+    scale: 1,
+    filter: 'blur(0px)',
+    transition: {
+      duration: 0.8,
+      ease: [0.16, 1, 0.3, 1] as const,
+    },
+  },
+};
+
+export function LuxuryTeamGallery(): React.ReactElement {
+  const [selectedMember, setSelectedMember] = useState<TeamMember | SpecialistAnalyst | null>(null);
+  const triggerRef = useRef<HTMLElement | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const scrollHorizontally = useCallback((offset: number) => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: offset, behavior: 'smooth' });
+    }
+  }, []);
+
+  const openFaculty = useCallback((member: TeamMember, el: HTMLElement) => {
+    triggerRef.current = el;
+    setSelectedMember(member);
+  }, []);
+
+  const openSpecialist = useCallback((analyst: SpecialistAnalyst, el: HTMLElement) => {
+    triggerRef.current = el;
+    setSelectedMember(analyst);
+  }, []);
+
+  const close = useCallback(() => {
+    setSelectedMember(null);
+    const el = triggerRef.current;
+    if (el) requestAnimationFrame(() => el.focus());
+  }, []);
+
+  return (
+    <div
+      id="team"
+      className="relative w-full bg-[#08080A] text-[#F3ECE0] overflow-hidden"
+      style={{
+        // Zero gap with section above
+        marginTop: '-2px',
+        paddingTop: '20px',
+      }}
+    >
+      <LightLeak from="left" intensity={0.6} className="fx-leak--top" />
+      {/* Deep atmospheric gold & obsidian ambient light */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: `
+            radial-gradient(ellipse 75% 35% at 50% 0%, rgba(212,175,55,0.09) 0%, transparent 65%),
+            radial-gradient(circle 600px at 15% 40%, rgba(185,140,55,0.05) 0%, transparent 65%),
+            radial-gradient(circle 700px at 85% 60%, rgba(212,175,55,0.04) 0%, transparent 70%)
+          `,
+        }}
+      />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 md:px-12 lg:px-16 pt-12 pb-28 relative z-10">
+        {/* Section Header */}
+        <div className="flex flex-col items-center text-center mb-14">
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.6 }}
+            className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border text-xs font-body font-medium tracking-widest uppercase mb-4"
+            style={{
+              borderColor: 'rgba(212,175,55,0.4)',
+              backgroundColor: 'rgba(212,175,55,0.08)',
+              color: '#E8CA65',
+              boxShadow: '0 0 20px rgba(212,175,55,0.15)',
+            }}
+          >
+            <span className="w-2 h-2 rounded-full bg-[#E8CA65] animate-pulse" />
+            The Institutional Faculty
+          </motion.div>
+
+          <LetterReveal
+            as="h2"
+            variant="flip"
+            className="display ff-bodoni max-w-3xl mb-4"
+            style={{ fontSize: 'var(--fs-h2)', color: '#FAF6F0' }}
+          >
+            Architects of the framework.<br />
+            <span className="italic lr-grad">Mentors in live execution.</span>
+          </LetterReveal>
+
+          <motion.p
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-base sm:text-lg text-[#AEA699] font-body max-w-xl leading-relaxed mb-8"
+          >
+            Tactile 3D interactive dossier. Every mentor actively manages institutional capital and audits your live trades directly.
+          </motion.p>
+        </div>
+
+        {/* ─── EDITORIAL FACULTY GRID ─── */}
+        <div className="flex items-center gap-3 mb-8">
+          <span className="label-caps" style={{ color: '#D4AF37' }}>
+            Faculty Leadership
+          </span>
+          <div className="flex-1 h-px" style={{ backgroundColor: 'rgba(212,175,55,0.25)' }} aria-hidden="true" />
+        </div>
+
+        <div className="faculty-grid grid grid-cols-1 lg:grid-cols-12 gap-x-8 gap-y-12 items-start">
+          {TEAM_MEMBERS.map((member, index) => (
+            <FacultyCard key={member.id} member={member} index={index} onInspect={openFaculty} />
+          ))}
+        </div>
+
+        {/* ─── SPECIALIST ANALYSIS DESK (AUTOMATED HORIZONTAL SPREAD) ─── */}
+        <div className="mt-20 pt-12 border-t border-[#D4AF37]/20">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border text-[11px] font-mono tracking-widest uppercase mb-3 border-[#D4AF37]/35 bg-[#D4AF37]/10 text-[#E8CA65]">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#E8CA65] animate-ping" />
+                Tactical Execution Faculty
+              </div>
+              <h3 className="display ff-bodoni text-2xl sm:text-3xl lg:text-4xl text-[#FAF6F0]">
+                Specialist Strategists.<br />
+                <span className="italic lr-grad">Market Specialists.</span>
+              </h3>
+              <p className="mt-2 text-sm text-[#A8A196] font-body max-w-xl">
+                Dedicated strategists covering Volume Dynamics, Candlestick Price Action, Trading Psychology, and Smart Money Concepts (SMC).
+              </p>
+            </div>
+
+            {/* Navigation Controls */}
+            <div className="flex items-center gap-3">
+              <div className="hidden sm:flex items-center gap-2 text-xs font-mono text-[#D4AF37] px-3.5 py-2 rounded-full bg-white/[0.03] border border-white/[0.08]">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#E8CA65]" />
+                <span>01 — 05 Specialists</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => scrollHorizontally(-340)}
+                  aria-label="Scroll left"
+                  className="w-10 h-10 rounded-full bg-white/[0.06] border border-white/[0.15] hover:bg-[#D4AF37]/20 hover:border-[#D4AF37]/60 flex items-center justify-center text-[#FAF1DE] transition-all cursor-pointer"
+                >
+                  ←
+                </button>
+                <button
+                  type="button"
+                  onClick={() => scrollHorizontally(340)}
+                  aria-label="Scroll right"
+                  className="w-10 h-10 rounded-full bg-white/[0.06] border border-white/[0.15] hover:bg-[#D4AF37]/20 hover:border-[#D4AF37]/60 flex items-center justify-center text-[#FAF1DE] transition-all cursor-pointer"
+                >
+                  →
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Automated Horizontal Spread Track */}
+          <motion.div
+            ref={scrollContainerRef}
+            data-lenis-prevent
+            variants={spreadContainerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.15 }}
+            className="flex flex-row overflow-x-auto gap-6 pb-6 pt-2 scroll-smooth no-scrollbar"
+            style={{
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+            }}
+          >
+            {SPECIALIST_ANALYSTS.map((analyst, idx) => (
+              <SpecialistCard
+                key={analyst.id}
+                analyst={analyst}
+                index={idx}
+                onInspect={openSpecialist}
+              />
+            ))}
+          </motion.div>
+        </div>
+      </div>
+
+      <FacultyModal member={selectedMember} onClose={close} />
+    </div>
+  );
+}
+
+// ─── Photo Box Component (resilient to missing files; user adds photo saved with their name) ───
+export function AnalystPhotoBox({
+  photoKey,
+  image,
+  name,
+  className = '',
+}: {
+  photoKey: string;
+  image?: string;
+  name: string;
+  className?: string;
+}): React.ReactElement {
+  const [candidateIndex, setCandidateIndex] = useState(0);
+  const [hasFailed, setHasFailed] = useState(false);
+  const [cacheBuster, setCacheBuster] = useState<number>(() => Date.now());
+
+  // Priority order of file paths to try
+  const candidates = useMemo(() => {
+    const list: string[] = [];
+    if (image) list.push(image);
+    const exts = ['png', 'jpeg', 'jpg', 'PNG', 'JPEG', 'JPG', 'webp'];
+    for (const ext of exts) {
+      const p = `/team/${photoKey}.${ext}`;
+      if (!list.includes(p)) list.push(p);
+    }
+    return list;
+  }, [image, photoKey]);
+
+  // When user returns to the browser tab, refresh timestamp so newly replaced photos show immediately
+  useEffect(() => {
+    const refresh = (): void => {
+      setCacheBuster(Date.now());
+      setCandidateIndex(0);
+      setHasFailed(false);
+    };
+    window.addEventListener('focus', refresh);
+    return () => window.removeEventListener('focus', refresh);
+  }, []);
+
+  const currentPath = candidates[candidateIndex] || `/team/${photoKey}.png`;
+  const src = `${currentPath}?v=${cacheBuster}`;
+
+  const handleError = (): void => {
+    if (candidateIndex < candidates.length - 1) {
+      setCandidateIndex((prev) => prev + 1);
+    } else {
+      setHasFailed(true);
+    }
+  };
+
+  const initials = name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+
+  return (
+    <div className={`relative w-full overflow-hidden rounded-xl bg-[#09090C] border border-[#D4AF37]/25 ${className}`}>
+      {!hasFailed ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          key={src}
+          src={src}
+          alt={name}
+          onError={handleError}
+          className="absolute inset-0 h-full w-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
+        />
+      ) : (
+        <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center border-2 border-dashed border-[#D4AF37]/45 hover:border-[#D4AF37] rounded-xl transition-all duration-300 bg-gradient-to-b from-[#0F0F14]/90 to-[#0A0A0D]/95">
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 pointer-events-none opacity-40"
+            style={{
+              background: 'radial-gradient(circle at center, rgba(212,175,55,0.15) 0%, transparent 70%)',
+            }}
+          />
+
+          <div className="relative mb-3 flex h-14 w-14 items-center justify-center rounded-full border border-[#D4AF37]/50 bg-[#14141B] shadow-[0_0_20px_rgba(212,175,55,0.2)]">
+            <span className="font-serif text-lg font-bold tracking-wider text-[#E8CA65]">{initials}</span>
+          </div>
+
+          <div className="mb-2 flex items-center justify-center text-[#D4AF37]">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.75"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+              <circle cx="12" cy="13" r="4" />
+            </svg>
+          </div>
+
+          <span className="text-[10px] font-mono font-semibold tracking-widest uppercase text-[#E8CA65] mb-1">
+            Photo Box
+          </span>
+          <p className="text-[11px] font-mono text-[#A8A196] leading-tight mb-2">
+            public/team/{photoKey}.png
+          </p>
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-mono text-[#D4AF37] bg-[#D4AF37]/10 border border-[#D4AF37]/30">
+            <span>+</span> Photo Box Ready
+          </span>
+        </div>
+      )}
+
+      {!hasFailed && (
+        <div className="absolute inset-0 bg-gradient-to-t from-[#08080A]/70 via-transparent to-transparent pointer-events-none" />
+      )}
+    </div>
+  );
+}
+
+// ─── Specialist Card ───
+interface SpecialistCardProps {
+  analyst: SpecialistAnalyst;
+  index: number;
+  onInspect: (analyst: SpecialistAnalyst, el: HTMLElement) => void;
+}
+
+function SpecialistCard({ analyst, onInspect }: SpecialistCardProps): React.ReactElement {
+  return (
+    <motion.article
+      variants={spreadCardVariants}
+      className="group relative w-[290px] sm:w-[330px] flex-shrink-0 rounded-2xl bg-[#0B0B0F] border border-[#D4AF37]/25 p-4 sm:p-5 flex flex-col justify-between hover:border-[#D4AF37]/60 hover:shadow-[0_12px_40px_rgba(212,175,55,0.16)] transition-all duration-300"
+    >
+      <div>
+        {/* Photo Box */}
+        <button
+          type="button"
+          onClick={(e) => onInspect(analyst, e.currentTarget)}
+          aria-label={`Open dossier: ${analyst.name}`}
+          className="block w-full text-left cursor-pointer rounded-xl focus-visible:outline-2 focus-visible:outline-[#D4AF37] mb-4"
+        >
+          <AnalystPhotoBox
+            photoKey={analyst.photoKey}
+            image={analyst.image}
+            name={analyst.name}
+            className="aspect-[3/4]"
+          />
+        </button>
+
+        {/* Index Number & Specialization Header */}
+        <div className="flex items-center justify-between gap-2 mb-2.5">
+          <span className="inline-flex items-center justify-center px-2 py-0.5 rounded text-[11px] font-mono font-bold tracking-wider text-[#0A0A0C] bg-[#E8CA65]">
+            {analyst.number}
+          </span>
+          <span className="text-[10px] font-mono uppercase tracking-widest text-[#D4AF37] truncate">
+            {analyst.specialization}
+          </span>
+        </div>
+
+        {/* Name */}
+        <h3 className="display font-medium text-2xl text-[#FAF6F0] tracking-tight mb-1">
+          {analyst.name}
+        </h3>
+
+        {/* Designation / Role */}
+        <div className="text-xs font-mono font-semibold tracking-wide text-[#E8CA65] mb-2 uppercase">
+          {analyst.role}
+        </div>
+
+        {/* Specialization Detail */}
+        <p className="text-xs text-[#A8A196] font-body leading-relaxed line-clamp-2 mb-4">
+          {analyst.bio}
+        </p>
+      </div>
+
+      <div>
+        {/* Tags */}
+        <div className="flex flex-wrap gap-1.5 mb-4">
+          {analyst.tags.slice(0, 3).map((tag) => (
+            <span
+              key={tag}
+              className="px-2 py-0.5 rounded-md text-[10px] font-body bg-white/[0.04] border border-white/[0.08] text-[#D8D0C2]"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+
+        {/* Inspect Dossier Action Button */}
+        <button
+          type="button"
+          onClick={(e) => onInspect(analyst, e.currentTarget)}
+          className="w-full py-2 px-3 rounded-lg bg-white/[0.04] hover:bg-[#D4AF37]/15 border border-white/[0.08] hover:border-[#D4AF37]/45 text-xs font-mono text-[#E8CA65] flex items-center justify-between transition-all cursor-pointer"
+        >
+          <span>Inspect Dossier</span>
+          <span>→</span>
+        </button>
+      </div>
+    </motion.article>
+  );
+}
+
+// ─── Editorial card ───
+interface FacultyCardProps {
+  member: TeamMember;
+  index: number;
+  onInspect: (member: TeamMember, el: HTMLElement) => void;
+}
+
+function FacultyCard({ member, index, onInspect }: FacultyCardProps): React.ReactElement {
+  const { col, aspect } = cardClasses(index, member.image);
+  const isDocumentOrGroup = Boolean(member.image?.includes('licence'));
+  return (
+    <article className={`fc group relative ${col}`}>
+      <button
+        type="button"
+        onClick={(e) => onInspect(member, e.currentTarget)}
+        aria-haspopup="dialog"
+        aria-label={`Open dossier: ${member.name}`}
+        className="block w-full text-left cursor-pointer rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#D4AF37]"
+      >
+        <motion.div
+          layoutId={`fac-${member.id}`}
+          className={`relative w-full overflow-hidden rounded-2xl bg-[#0A0A0C] border border-[#D4AF37]/25 ${aspect}`}
+        >
+          <CurtainImage className="absolute inset-0">
+            <div className="fc-img relative h-full w-full">
+              {isDocumentOrGroup ? (
+                <div className="relative h-full w-full p-2.5 sm:p-3 flex items-center justify-center bg-[#07070A]">
+                  <Image
+                    src={member.image}
+                    alt={member.name}
+                    fill
+                    sizes="(max-width: 1024px) 100vw, (max-width: 1280px) 40vw, 480px"
+                    style={{ objectFit: 'contain', objectPosition: 'center center' }}
+                  />
+                </div>
+              ) : (
+                <>
+                  <Parallax speed={0.1} className="absolute inset-x-0 -inset-y-[8%]">
+                    <Image
+                      src={member.image}
+                      alt={member.name}
+                      fill
+                      sizes="(max-width: 1024px) 100vw, (max-width: 1280px) 40vw, 480px"
+                      style={{ objectFit: 'cover', objectPosition: imgPosition(member.image) }}
+                    />
+                  </Parallax>
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#08080A]/70 via-transparent to-transparent pointer-events-none" />
+                </>
+              )}
+            </div>
+          </CurtainImage>
+        </motion.div>
+      </button>
+
+      <div className="mt-5">
+        <div className="text-[11px] uppercase tracking-widest text-[#D4AF37] font-body font-semibold mb-1">
+          {member.title}
+        </div>
+        <h3 className="display font-medium text-2xl sm:text-3xl text-[#FAF6F0] tracking-tight">
+          {member.name}
+        </h3>
+        <p className="mt-2 text-xs sm:text-sm text-[#A8A196] font-body">{member.pedigree}</p>
+      </div>
+    </article>
+  );
+}
+
+// ─── Dossier modal (shared-element image, focus trap, Esc, Lenis pause) ───
+function FacultyModal({
+  member,
+  onClose,
+}: {
+  member: TeamMember | SpecialistAnalyst | null;
+  onClose: () => void;
+}): React.ReactElement {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const isOpen = member !== null;
+
+  useEffect(() => {
+    if (!isOpen) return;
+    getLenis()?.stop();
+    closeRef.current?.focus();
+    const onKey = (e: KeyboardEvent): void => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+      const root = dialogRef.current;
+      if (!root) return;
+      const focusables = Array.from(
+        root.querySelectorAll<HTMLElement>('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'),
+      ).filter((el) => !el.hasAttribute('disabled'));
+      if (!focusables.length) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const active = document.activeElement;
+      if (!root.contains(active)) {
+        e.preventDefault();
+        first.focus();
+      } else if (e.shiftKey && active === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      getLenis()?.start();
+    };
+  }, [isOpen, onClose]);
+
+  const memberImage = member && 'image' in member ? member.image : null;
+  const photoKey = member && 'photoKey' in member ? member.photoKey : null;
+  const memberNumber = member && 'number' in member ? member.number : null;
+  const subtitle =
+    member && 'pedigree' in member
+      ? member.pedigree
+      : member && 'specialization' in member
+      ? member.specialization
+      : '';
+
+  return (
+    <AnimatePresence>
+      {member && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/90"
+          onClick={onClose}
+        >
+          <motion.div
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="faculty-dialog-title"
+            initial={{ scale: 0.96, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.96, opacity: 0, y: 20 }}
+            transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-3xl rounded-3xl bg-[#0F0F14] border border-[#D4AF37]/45 shadow-[0_25px_80px_rgba(0,0,0,0.85),0_0_50px_rgba(212,175,55,0.18)] overflow-hidden text-[#F5EFEB]"
+          >
+            {/* Top ambient gold accent */}
+            <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent z-10" />
+
+            {/* Close Button */}
+            <button
+              ref={closeRef}
+              type="button"
+              onClick={onClose}
+              aria-label="Close dossier"
+              className="absolute top-5 right-5 z-20 w-10 h-10 rounded-full bg-white/[0.08] border border-white/[0.14] hover:bg-[#D4AF37]/20 hover:border-[#D4AF37]/60 flex items-center justify-center text-[#FAF1DE] transition-all cursor-pointer"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+
+            <div data-lenis-prevent className="grid grid-cols-1 md:grid-cols-12 max-h-[85vh] overflow-y-auto">
+              <motion.div
+                layoutId={`fac-${member.id}`}
+                className="relative md:col-span-5 h-72 md:h-full min-h-[340px] bg-[#0A0A0C] overflow-hidden flex items-center justify-center p-3"
+              >
+                {photoKey ? (
+                  <AnalystPhotoBox
+                    photoKey={photoKey}
+                    image={memberImage ?? undefined}
+                    name={member.name}
+                    className="h-full min-h-[320px] aspect-[3/4]"
+                  />
+                ) : memberImage ? (
+                  <>
+                    <Image
+                      src={memberImage}
+                      alt={member.name}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 360px"
+                      style={{
+                        objectFit: memberImage.includes('licence') ? 'contain' : 'cover',
+                        objectPosition: imgPosition(memberImage),
+                      }}
+                    />
+                    {!memberImage.includes('licence') && (
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#0F0F14] md:bg-gradient-to-r md:from-transparent md:to-[#0F0F14] opacity-90" />
+                    )}
+                  </>
+                ) : null}
+              </motion.div>
+
+              <div className="md:col-span-7 p-6 sm:p-8 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    {memberNumber && (
+                      <span className="inline-block px-2.5 py-1 rounded-full text-[10px] font-mono font-bold text-[#0A0A0C] bg-[#E8CA65]">
+                        {memberNumber}
+                      </span>
+                    )}
+                    <div className="inline-block px-3 py-1 rounded-full text-[10px] font-mono uppercase tracking-widest text-[#E8CA65] bg-[#D4AF37]/12 border border-[#D4AF37]/35">
+                      {subtitle}
+                    </div>
+                  </div>
+                  <h3
+                    id="faculty-dialog-title"
+                    className="display font-medium text-3xl sm:text-4xl text-[#FBF8F3] tracking-tight mb-1"
+                  >
+                    {member.name}
+                  </h3>
+                  <p className="text-sm font-body text-[#D4AF37] mb-5">{member.role}</p>
+
+                  <p className="text-sm sm:text-base text-[#C2BBB0] font-body leading-relaxed mb-6">{member.bio}</p>
+
+                  <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/[0.08] relative mb-6">
+                    <span className="display text-3xl text-[#D4AF37]/35 absolute top-2 left-3 leading-none" aria-hidden="true">“</span>
+                    <p className="text-xs sm:text-sm italic text-[#E5DDD0] pl-5 leading-relaxed">{member.quote}</p>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {member.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-2.5 py-1 rounded-lg text-xs font-body bg-white/[0.04] border border-white/[0.08] text-[#D8D0C2]"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-white/[0.08] flex items-center justify-between text-xs font-mono text-[#A59D91]">
+                  <span>Focus: <strong className="text-[#FAF1DE]">{member.tags[0] ?? member.role}</strong></span>
+                  <span>Discipline: <strong className="text-[#E8CA65]">{member.tags[1] ?? 'Live Audits'}</strong></span>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
