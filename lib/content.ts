@@ -452,7 +452,7 @@ export const SPECIALIST_ANALYSTS: SpecialistAnalyst[] = [
   {
     id: 'analyst-sagar',
     number: '04',
-    name: 'Sagar',
+    name: 'Amruth',
     role: 'Smart Money Strategist',
     photoKey: 'sagar',
     image: '/team/sagar.png',
@@ -464,7 +464,7 @@ export const SPECIALIST_ANALYSTS: SpecialistAnalyst[] = [
   {
     id: 'analyst-amruth',
     number: '05',
-    name: 'Amruth',
+    name: 'Sagar',
     role: 'Market Structure Strategist',
     photoKey: 'amruth',
     image: '/team/amruth.png',
